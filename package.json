@@ -1,0 +1,33 @@
+{
+  "name": "potato-salad",
+  "version": "1.0.0",
+  "description": "A Discord Bot featuring potatoes and salads",
+  "main": "index.js",
+  "dependencies": {
+    "@discordjs/builders": "^0.13.0",
+    "@discordjs/rest": "^0.4.1",
+    "discord-api-types": "^0.33.0",
+    "discord.js": "^13.7.0",
+    "dotenv": "^16.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.16.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JosephJoshua/potato-salad.git"
+  },
+  "keywords": [
+    "potato",
+    "salad"
+  ],
+  "author": "JosephJoshua",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JosephJoshua/potato-salad/issues"
+  },
+  "homepage": "https://github.com/JosephJoshua/potato-salad#readme"
+}
