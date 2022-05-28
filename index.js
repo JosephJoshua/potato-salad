@@ -9,6 +9,8 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const loadHelpers = () => {
     client.logger = require('./helpers/logger');
+    client.date = require('./helpers/date');
+    client.colors = require('./helpers/colors');
     client.requireFiles = require('./helpers/requireFiles');
 };
 
