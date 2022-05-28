@@ -31,7 +31,7 @@ const splitRolesToColumns = roles => {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('user')
-        .setDescription('Shows a server member\'s information.')
+        .setDescription('Shows information about a server member.')
         .addUserOption(option =>
             option.setName('member')
                 .setDescription('The member.')
@@ -47,7 +47,7 @@ module.exports = {
         const bot = interaction.client.user;
 
         const embed = new MessageEmbed()
-            .setTitle(member.displayName)
+            .setTitle(`User Info - ${member.displayName}`)
             .setColor(interaction.client.colors.primary)
             .setThumbnail(user.avatarURL())
             .addField('Username', user.username, true)
