@@ -11,6 +11,7 @@ const loadHelpers = () => {
     client.logger = require('./helpers/logger');
     client.date = require('./helpers/date');
     client.colors = require('./helpers/colors');
+    client.pagination = require('./helpers/pagination');
     client.requireFiles = require('./helpers/requireFiles');
 };
 
