@@ -1,55 +1,44 @@
-const fs = require('node:fs');
-const path = require('node:path');
-
 const { Client, Collection, Intents } = require('discord.js');
 
 const dotenv = require('dotenv');
 
 dotenv.config();
-
 const { DISCORD_TOKEN } = process.env;
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
-client.commands = new Collection();
 
-function loadHelpers() {
+const loadHelpers = () => {
     client.logger = require('./helpers/logger');
-}
+    client.requireFiles = require('./helpers/requireFiles');
+};
 
-function loadCommands() {
-    const commandsPath = path.join(__dirname, 'commands');
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const loadCommands = () => {
+    client.commands = new Collection();
 
-    client.logger.log(`Loading a total of ${commandFiles.length} commands.`, client.logger.logTypes.log);
-
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
-
+    client.requireFiles('./commands', command => {
         client.logger.log(`Loading command: /${command.data.name}.`, client.logger.logTypes.log);
         client.commands.set(command.data.name, command);
-    }
-}
+    });
 
-function loadEvents() {
-    const eventsPath = path.join(__dirname, 'events');
-    const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+    client.logger.log(`Loaded a total of ${client.commands.size} commands.`, client.logger.logTypes.log);
+};
 
-    client.logger.log(`Loading a total of ${eventFiles.length} events.`, client.logger.logTypes.log);
+const loadEvents = () => {
+    client.events = new Collection();
 
-    for (const file of eventFiles) {
-        const filePath = path.join(eventsPath, file);
-        const event = require(filePath);
-
+    client.requireFiles('./events', event => {
         client.logger.log(`Loading event: ${event.name}.`, client.logger.logTypes.log);
+        client.events.set(event.name, event);
 
         if (event.once) {
             client.once(event.name, (...args) => event.execute(...args));
         } else {
             client.on(event.name, (...args) => event.execute(...args));
         }
-    }
-}
+    });
+
+    client.logger.log(`Loaded a total of ${client.events.size} events.`, client.logger.logTypes.log);
+};
 
 loadHelpers();
 loadCommands();

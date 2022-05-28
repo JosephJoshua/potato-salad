@@ -6,9 +6,9 @@ const logTypes = Object.freeze(
     },
 );
 
-function formatDate(date) {
+const formatDate = date => {
     return date.toISOString().replace(/T|Z/g, ' ').trim();
-}
+};
 
 class Logger {
     static log(content, type = logTypes.log) {
