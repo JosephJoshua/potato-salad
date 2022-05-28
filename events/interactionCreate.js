@@ -3,16 +3,17 @@ module.exports = {
     async execute(interaction) {
         if (!interaction.isCommand()) return;
 
-        const command = interaction.client.commands.get(interaction.commandName);
+        const client = interaction.client;
+        const command = client.commands.get(interaction.commandName);
 
         if (!command) return;
 
         try {
             await command.execute(interaction);
+            client.logger.log(`${interaction.user.tag} executed /${interaction.commandName} in #${interaction.channel.name}.`, client.logger.logTypes.command);
         } catch (error) {
-            console.error(error);
+            client.logger.log(error, client.logger.logTypes.error);
             await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
         }
-        console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`);
     },
 };
