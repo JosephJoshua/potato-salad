@@ -64,7 +64,7 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
         fetchReply: true,
     });
 
-    client.bot.logger.log(`Created paginated embed with ${pages.length} pages.`);
+    client.bot.logger.log(`Created paginated embed with ${pages.length} pages`);
 
     const collector = await currentPage.createMessageComponentCollector({ componentType: 'BUTTON', time: timeout });
 
@@ -130,13 +130,13 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
                 if (err.code === 10008) {
                     client.bot.logger.log(`Paginated embed with ${pages.length} pages was deleted.`);
                 } else {
-                    client.bot.logger.log(err, client.bot.logger.logTypes.error);
+                    client.bot.logger.logError(err);
                 }
 
                 return;
             }
 
-            client.bot.logger.log(`Paginated embed with ${pages.length} pages expired after ${timeoutStr} seconds.`);
+            client.bot.logger.log(`Paginated embed with ${pages.length} pages expired after ${timeoutStr} seconds`);
         }
     });
 
