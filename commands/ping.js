@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,20 +8,12 @@ module.exports = {
     async execute(interaction) {
         const { client } = interaction;
 
-        const embed = new MessageEmbed()
-            .setColor(client.bot.colors.primary)
-            .setTitle('Pong!')
-            .setTimestamp()
-            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() });
-
+        const embed = new client.bot.embeds.DefaultEmbed(client).setTitle('Pong!');
         const reply = await interaction.reply({ embeds: [embed], fetchReply: true });
 
-        const replyEmbed = new MessageEmbed()
-            .setColor(client.bot.colors.primary)
+        const replyEmbed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle('Pong!')
-            .setThumbnail(client.user.displayAvatarURL())
-            .setTimestamp()
-            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
+            .showBotThumbnail()
             .addField('API', `${client.ws.ping}ms`)
             .addField('Latency', `${reply.createdTimestamp - interaction.createdTimestamp}ms`);
 

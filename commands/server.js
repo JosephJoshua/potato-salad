@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
 
 const boostTiers = {
     'NONE': 'Level 0',
@@ -39,12 +38,9 @@ module.exports = {
         const boostTier = boostTiers[guild.premiumTier];
         const boostsText = `${guild.premiumSubscriptionCount} (${boostTier})`;
 
-        const embed = new MessageEmbed()
-            .setColor(client.bot.colors.primary)
+        const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Server information - ${guild.name}`)
             .setThumbnail(guild.iconURL())
-            .setTimestamp()
-            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
             .addField('ID', guild.id, true)
             .addField('Owner', owner.user.tag, true)
             .addField('Members', membersText, true)

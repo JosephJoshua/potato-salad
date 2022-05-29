@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
 
 const splitRolesToColumns = roles => {
     const roleCols = new Array('', '', '');
@@ -44,12 +43,9 @@ module.exports = {
         const boostingSince = member.premiumSince ? client.bot.date.formatDate(member.premiumSince) : 'Not Boosting';
         const isInVoice = member.voice.channel ? 'Yes' : 'No';
 
-        const embed = new MessageEmbed()
-            .setColor(client.bot.colors.primary)
+        const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`User information - ${member.displayName}`)
             .setThumbnail(member.displayAvatarURL())
-            .setTimestamp()
-            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
             .addField('Username', member.user.username, true)
             .addField('ID', member.id, true)
             .addField('Joined Server', client.bot.date.formatDate(member.joinedAt), true)

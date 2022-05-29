@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,12 +13,9 @@ module.exports = {
         const { client } = interaction;
         const member = interaction.options.getMember('username') ?? interaction.member;
 
-        const embed = new MessageEmbed()
-            .setColor(client.bot.colors.primary)
+        const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Avatar - ${member.displayName}`)
-            .setImage(member.displayAvatarURL())
-            .setTimestamp()
-            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() });
+            .setImage(member.displayAvatarURL());
 
         await interaction.reply({ embeds: [embed] });
     },

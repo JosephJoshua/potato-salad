@@ -1,20 +1,41 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
 
 const commandsPerPage = 10;
 
 const optionsToString = options => {
-    let optionStr = '';
-
-    for (let i = 0; i < options.length; i++) {
-        if (options[i].required) {
-            optionStr += `[${options[i].name}]`;
+    return options.map(option => {
+        if (option.required) {
+            return `[${option.name}]`;
         } else {
-            optionStr += `(optional ${options[i].name})`;
+            return `(${option.name})`;
         }
-    }
+    }).join(' ');
+};
 
-    return optionStr;
+const generateUnknownCommandEmbed = (client, commandName) => {
+    return new client.bot.embeds.DefaultEmbed(client)
+        .setTitle('Command help')
+        .setDescription(`There's no command called "${commandName}"!\nYou can look at a list of all the commands using \`/help\``)
+        .showBotThumbnail();
+};
+
+const generateCommandHelpEmbed = (client, command) => {
+    const optionStr = optionsToString(command.data.options);
+
+    // Remove any trailing spaces in case there weren't any options.
+    const usageStr = `\`/${command.data.name} ${optionStr}`.trimEnd() + '`';
+
+    return new client.bot.embeds.DefaultEmbed(client)
+        .setTitle('Command help')
+        .showBotThumbnail()
+        .addField(`/${command.data.name}`, command.data.description)
+        .addField('Usage', usageStr);
+};
+
+const generateCommandPageEmbed = (client, memberName) => {
+    return new client.bot.embeds.DefaultEmbed(client)
+        .setTitle(`Help | ${memberName}`)
+        .setDescription('Use `/help (command)` for help with a specific command.');
 };
 
 module.exports = {
@@ -32,38 +53,23 @@ module.exports = {
         const { client } = interaction;
         const commands = client.bot.commands;
 
+        // Handle single command help [/help (command)].
         const commandName = interaction.options.get('command')?.value;
         if (commandName !== undefined) {
+
             const command = commands.find(c => c.data.name === commandName);
             if (command === undefined) {
-                const embed = new MessageEmbed()
-                    .setColor(client.bot.colors.primary)
-                    .setTitle('Command help')
-                    .setDescription(`There's no command called "${commandName}"!\nYou can look at a list of all the commands using \`/help\``)
-                    .setThumbnail(client.user.displayAvatarURL())
-                    .setTimestamp()
-                    .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() });
-
+                const embed = generateUnknownCommandEmbed(client, commandName);
                 await interaction.reply({ embeds: [embed], ephemeral: true });
-                return;
+            } else {
+                const embed = generateCommandHelpEmbed(client, command);
+                await interaction.reply({ embeds: [embed] });
             }
 
-            const optionStr = optionsToString(command.data.options);
-            const usageStr = `\`/${command.data.name}${optionStr != '' ? ' ' : ''}${optionStr}\``;
-
-            const embed = new MessageEmbed()
-                .setColor(client.bot.colors.primary)
-                .setTitle('Command help')
-                .setThumbnail(client.user.displayAvatarURL())
-                .setTimestamp()
-                .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
-                .addField(`/${command.data.name}`, command.data.description)
-                .addField('Usage', usageStr);
-
-            await interaction.reply({ embeds: [embed] });
             return;
         }
 
+        // Handle command list (/help).
         const pages = [];
         let pageIndex = 0;
 
@@ -75,22 +81,23 @@ module.exports = {
 
             // Create a new embed if it's a new page.
             if (pages[pageIndex] === undefined) {
-                pages[pageIndex] = new MessageEmbed()
-                    .setColor(client.bot.colors.primary)
-                    .setTitle(`Help | ${interaction.member.displayName}`)
-                    .setTimestamp()
-                    .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
-                    .setDescription('Use `/help (command)` for help with a specific command.')
-                    .addField(fieldName, fieldValue);
-            } else {
-                pages[pageIndex].addField(fieldName, fieldValue);
+                pages[pageIndex] = generateCommandPageEmbed(client, interaction.member.displayName);
             }
+
+            // Add the command as a field in the embed.
+            pages[pageIndex].addField(fieldName, fieldValue);
 
             // If we're past the max commands per page, move to the next page.
             if (pages[pageIndex].fields.length >= commandsPerPage) {
                 pageIndex++;
             }
         }
+
+        // Add notes to the last field of every page.
+        const notes = '\n\n**() = optional | [] = required**';
+        pages.forEach(page => {
+            page.fields[page.fields.length - 1].value += notes;
+        });
 
         await client.bot.pagination.paginatedEmbed(interaction, pages);
     },

@@ -111,30 +111,30 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
         collector.resetTimer();
     });
 
-    collector.on('end', (_, reason) => {
+    collector.on('end', async (_, reason) => {
         if (reason !== 'messageDelete') {
-            // Limit timeout time to be a maximum of 2 decimal places.
+            // Limit the timeout string to show a maximum of 2 decimal places (in seconds).
             let timeoutStr = (timeout / 1000).toFixed(2);
-            let i = timeoutStr.length - 1;
+            timeoutStr = Number.parseFloat(timeoutStr).toString();
 
-            // Remove all trailing zeroes and '.'
-            while (timeoutStr[i] === '0' || timeoutStr[i] === '.') {
-                i--;
-            }
-
-            timeoutStr = timeoutStr.substring(0, i + 1);
             infoBtn.setLabel(`Expired after ${timeoutStr} seconds`);
 
             try {
-                currentPage.edit({
+                await currentPage.edit({
                     embeds: [pages[currentPageIndex].setFooter(getFooter())],
                     components: [buttonRow],
                 });
+            } catch (err) {
+                // 10008: Unknown Message
+                // The message has been deleted so we can just ignore it.
+                if (err.code === 10008) {
+                    client.bot.logger.log(`Paginated embed with ${pages.length} pages was deleted.`);
+                } else {
+                    client.bot.logger.log(err, client.bot.logger.logTypes.error);
+                }
 
-            // Discord will throw an error if the message was deleted and
-            // we try to edit it and the message.deleted property has been deprecated.
-            // eslint-disable-next-line no-empty
-            } catch (err) {}
+                return;
+            }
 
             client.bot.logger.log(`Paginated embed with ${pages.length} pages expired after ${timeoutStr} seconds.`);
         }
