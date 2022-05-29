@@ -19,11 +19,10 @@ const pluralize = (count, word, suffix = 's') => {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('server')
-        .setDescription('Shows information about this server.'),
+        .setDescription('Shows the server\'s information'),
+
     async execute(interaction) {
-        const guild = interaction.guild;
-        const bot = interaction.client.user;
-        const dateHelper = interaction.client.date;
+        const { client, guild } = interaction;
 
         const owner = await guild.fetchOwner();
 
@@ -40,20 +39,18 @@ module.exports = {
         const boostTier = boostTiers[guild.premiumTier];
         const boostsText = `${guild.premiumSubscriptionCount} (${boostTier})`;
 
-        console.log(guild);
-
         const embed = new MessageEmbed()
-            .setTitle(`Server Info - ${guild.name}`)
-            .setColor(interaction.client.colors.primary)
+            .setColor(client.bot.colors.primary)
+            .setTitle(`Server information - ${guild.name}`)
             .setThumbnail(guild.iconURL())
+            .setTimestamp()
+            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
             .addField('ID', guild.id, true)
             .addField('Owner', owner.user.tag, true)
             .addField('Members', membersText, true)
-            .addField('Created At', dateHelper.formatDate(guild.createdAt), true)
+            .addField('Created At', client.bot.date.formatDate(guild.createdAt), true)
             .addField('Boosts', boostsText, true)
-            .addField('Channels', channelsText, true)
-            .setFooter({ text: bot.username, iconURL: bot.avatarURL() })
-            .setTimestamp();
+            .addField('Channels', channelsText, true);
 
         await interaction.reply({ embeds: [embed] });
     },

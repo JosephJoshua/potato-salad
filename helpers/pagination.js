@@ -5,6 +5,9 @@ const nextButtonId = 'next';
 const infoButtonId = 'info';
 
 const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
+
+    const { client } = interaction;
+
     if (!interaction) {
         throw new Error('interaction must not be null.');
     }
@@ -12,8 +15,6 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
     if (!pages) {
         throw new Error('pages must not be null.');
     }
-
-    const bot = interaction.client.user;
 
     if (!interaction.deferred) {
         await interaction.deferReply();
@@ -51,8 +52,8 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
 
     const getFooter = () => {
         return {
-            text: `Page ${currentPageIndex + 1} of ${pages.length} | ${bot.username}`,
-            iconURL: bot.avatarURL(),
+            text: `v${client.bot.version} | Page ${currentPageIndex + 1} of ${pages.length}`,
+            iconURL: client.user.displayAvatarURL(),
         };
     };
 
@@ -63,7 +64,7 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
         fetchReply: true,
     });
 
-    interaction.client.logger.log(`Created paginated embed with ${pages.length} pages.`);
+    client.bot.logger.log(`Created paginated embed with ${pages.length} pages.`);
 
     const collector = await currentPage.createMessageComponentCollector({ componentType: 'BUTTON', time: timeout });
 
@@ -135,7 +136,7 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
             // eslint-disable-next-line no-empty
             } catch (err) {}
 
-            interaction.client.logger.log(`Paginated embed with ${pages.length} pages expired after ${timeoutStr} seconds.`);
+            client.bot.logger.log(`Paginated embed with ${pages.length} pages expired after ${timeoutStr} seconds.`);
         }
     });
 

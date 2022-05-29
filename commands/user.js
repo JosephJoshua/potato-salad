@@ -31,29 +31,29 @@ const splitRolesToColumns = roles => {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('user')
-        .setDescription('Shows information about a server member.')
+        .setDescription('Shows a user\'s information')
         .addUserOption(option =>
-            option.setName('member')
-                .setDescription('The member.')
-                .setRequired(true),
+            option.setName('username')
+                .setDescription('Select a user'),
         ),
 
     async execute(interaction) {
-        const dateHelper = interaction.client.date;
-        const user = interaction.options.getUser('member');
-        const member = interaction.guild.members.cache.get(user.id);
-        const boostingSince = member.premiumSince ? dateHelper.formatDate(member.premiumSince) : 'Not Boosting';
+        const { client } = interaction;
+        const member = interaction.options.getMember('username') ?? interaction.member;
+
+        const boostingSince = member.premiumSince ? client.bot.date.formatDate(member.premiumSince) : 'Not Boosting';
         const isInVoice = member.voice.channel ? 'Yes' : 'No';
-        const bot = interaction.client.user;
 
         const embed = new MessageEmbed()
-            .setTitle(`User Info - ${member.displayName}`)
-            .setColor(interaction.client.colors.primary)
-            .setThumbnail(user.avatarURL())
-            .addField('Username', user.username, true)
-            .addField('ID', user.id, true)
-            .addField('Joined Server', dateHelper.formatDate(member.joinedAt), true)
-            .addField('Joined Discord', dateHelper.formatDate(user.createdAt), true)
+            .setColor(client.bot.colors.primary)
+            .setTitle(`User information - ${member.displayName}`)
+            .setThumbnail(member.displayAvatarURL())
+            .setTimestamp()
+            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
+            .addField('Username', member.user.username, true)
+            .addField('ID', member.id, true)
+            .addField('Joined Server', client.bot.date.formatDate(member.joinedAt), true)
+            .addField('Joined Discord', client.bot.date.formatDate(member.user.createdAt), true)
             .addField('Boosting Since', boostingSince, true)
             .addField('In Voice', isInVoice, true);
 
@@ -64,11 +64,10 @@ module.exports = {
             if (i === 0) {
                 embed.addField(`Roles (${roles.size - 1})`, roleCols[i], true);
             } else if (roleCols[i] !== '') {
-                embed.addField('', roleCols[i], true);
+                embed.addField('\u200b', roleCols[i], true);
             }
         }
 
-        embed.setFooter({ text: bot.username, iconURL: bot.avatarURL() }).setTimestamp();
         await interaction.reply({ embeds: [embed] });
     },
 };

@@ -4,22 +4,28 @@ const { MessageEmbed } = require('discord.js');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('Pings the server.'),
+        .setDescription('Pings the server'),
+
     async execute(interaction) {
-        const reply = await interaction.reply({ content: 'Pong!', fetchReply: true });
-        const latency = reply.createdTimestamp - interaction.createdTimestamp;
-        const apiPing = interaction.client.ws.ping;
-        const bot = interaction.client.user;
+        const { client } = interaction;
 
         const embed = new MessageEmbed()
+            .setColor(client.bot.colors.primary)
             .setTitle('Pong!')
-            .setColor(interaction.client.colors.primary)
-            .setThumbnail(bot.avatarURL())
-            .addField('Latency', `${latency}ms`, true)
-            .addField('API Ping', `${apiPing}ms`, true)
-            .setFooter({ text: bot.username, iconURL: bot.avatarURL() })
-            .setTimestamp();
+            .setTimestamp()
+            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() });
 
-        await interaction.editReply({ content: '\u200b', embeds: [embed] });
+        const reply = await interaction.reply({ embeds: [embed], fetchReply: true });
+
+        const replyEmbed = new MessageEmbed()
+            .setColor(client.bot.colors.primary)
+            .setTitle('Pong!')
+            .setThumbnail(client.user.displayAvatarURL())
+            .setTimestamp()
+            .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
+            .addField('API', `${client.ws.ping}ms`)
+            .addField('Latency', `${reply.createdTimestamp - interaction.createdTimestamp}ms`);
+
+        await interaction.editReply({ embeds: [replyEmbed] });
     },
 };

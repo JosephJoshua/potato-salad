@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js');
 
 const commandsPerPage = 10;
 
-const optionsToString = (options) => {
+const optionsToString = options => {
     let optionStr = '';
 
     for (let i = 0; i < options.length; i++) {
@@ -20,30 +20,29 @@ const optionsToString = (options) => {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
-        .setDescription('Provides help on available commands.')
+        .setDescription('Provides help on available commands')
 
         // TODO: Maybe add autocomplete.
         .addStringOption(option =>
-            option
-                .setName('command')
+            option.setName('command')
                 .setDescription('Name of the command to get information on.'),
         ),
 
     async execute(interaction) {
-        const bot = interaction.client.user;
-        const commands = interaction.client.commands;
+        const { client } = interaction;
+        const commands = client.bot.commands;
 
         const commandName = interaction.options.get('command')?.value;
         if (commandName !== undefined) {
             const command = commands.find(c => c.data.name === commandName);
             if (command === undefined) {
                 const embed = new MessageEmbed()
-                    .setTitle('Command Help')
+                    .setColor(client.bot.colors.primary)
+                    .setTitle('Command help')
                     .setDescription(`There's no command called "${commandName}"!\nYou can look at a list of all the commands using \`/help\``)
-                    .setThumbnail(bot.avatarURL())
-                    .setColor(interaction.client.colors.primary)
-                    .setFooter({ text: bot.username, iconURL: bot.avatarURL() })
-                    .setTimestamp();
+                    .setThumbnail(client.user.displayAvatarURL())
+                    .setTimestamp()
+                    .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() });
 
                 await interaction.reply({ embeds: [embed], ephemeral: true });
                 return;
@@ -53,13 +52,13 @@ module.exports = {
             const usageStr = `\`/${command.data.name}${optionStr != '' ? ' ' : ''}${optionStr}\``;
 
             const embed = new MessageEmbed()
-                .setTitle('Command Help')
+                .setColor(client.bot.colors.primary)
+                .setTitle('Command help')
+                .setThumbnail(client.user.displayAvatarURL())
+                .setTimestamp()
+                .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
                 .addField(`/${command.data.name}`, command.data.description)
-                .addField('Usage', usageStr)
-                .setThumbnail(bot.avatarURL())
-                .setColor(interaction.client.colors.primary)
-                .setFooter({ text: bot.username, iconURL: bot.avatarURL() })
-                .setTimestamp();
+                .addField('Usage', usageStr);
 
             await interaction.reply({ embeds: [embed] });
             return;
@@ -77,12 +76,12 @@ module.exports = {
             // Create a new embed if it's a new page.
             if (pages[pageIndex] === undefined) {
                 pages[pageIndex] = new MessageEmbed()
+                    .setColor(client.bot.colors.primary)
                     .setTitle(`Help | ${interaction.member.displayName}`)
+                    .setTimestamp()
+                    .setFooter({ text: `v${client.bot.version}`, iconURL: client.user.displayAvatarURL() })
                     .setDescription('Use `/help (command)` for help with a specific command.')
-                    .setColor(interaction.client.colors.primary)
-                    .addField(fieldName, fieldValue)
-                    .setFooter({ text: bot.username, iconURL: bot.avatarURL() })
-                    .setTimestamp();
+                    .addField(fieldName, fieldValue);
             } else {
                 pages[pageIndex].addField(fieldName, fieldValue);
             }
@@ -93,6 +92,6 @@ module.exports = {
             }
         }
 
-        await interaction.client.pagination.paginatedEmbed(interaction, pages);
+        await client.bot.pagination.paginatedEmbed(interaction, pages);
     },
 };
