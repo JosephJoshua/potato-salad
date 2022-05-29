@@ -38,15 +38,16 @@ const generateCommandPageEmbed = (client, memberName) => {
         .setDescription('Use `/help (command)` for help with a specific command.');
 };
 
+let autocompleteList = null;
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('help')
         .setDescription('Provides help on available commands')
-
-        // TODO: Maybe add autocomplete.
         .addStringOption(option =>
             option.setName('command')
-                .setDescription('Name of the command to get information on.'),
+                .setDescription('Name of the command to get information on.')
+                .setAutocomplete(true),
         ),
 
     async execute(interaction) {
@@ -100,5 +101,28 @@ module.exports = {
         });
 
         await client.bot.pagination.paginatedEmbed(interaction, pages);
+    },
+
+    async handleAutocomplete(interaction) {
+        const { client } = interaction;
+
+        if (autocompleteList === null) {
+            autocompleteList = client.bot.commands.map(command => {
+                return {
+                    name: `/${command.data.name}`,
+                    value: command.data.name,
+                };
+            });
+        }
+
+        const query = interaction.options.getFocused().trim();
+        let suggestions = autocompleteList;
+
+        // We only want to filter the list if the user has typed something.
+        if (query !== '') {
+            suggestions = suggestions.filter(command => command.name.includes(query));
+        }
+
+        await interaction.respond(suggestions);
     },
 };
