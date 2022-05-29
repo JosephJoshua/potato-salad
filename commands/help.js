@@ -35,7 +35,7 @@ const generateCommandHelpEmbed = (client, command) => {
 const generateCommandPageEmbed = (client, memberName) => {
     return new client.bot.embeds.DefaultEmbed(client)
         .setTitle(`Help | ${memberName}`)
-        .setDescription('Use `/help (command)` for help with a specific command.');
+        .setDescription('Use `/help (command)` for help with a specific command');
 };
 
 let autocompleteList = null;
@@ -46,7 +46,7 @@ module.exports = {
         .setDescription('Provides help on available commands')
         .addStringOption(option =>
             option.setName('command')
-                .setDescription('Name of the command to get information on.')
+                .setDescription('Name of the command to get information on')
                 .setAutocomplete(true),
         ),
 

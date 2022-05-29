@@ -1,34 +1,26 @@
 const { MessageEmbed } = require('discord.js');
 
 class DefaultEmbed extends MessageEmbed {
-    constructor(client, { hideDefaultFooter = false } = {}) {
-        super().setColor(client.bot.colors.primary).setTimestamp();
+    constructor(client, setDefaultFooter = true) {
+        super()
+            .setColor(client.bot.colors.primary)
+            .setTimestamp();
 
         this.client = client;
 
-        if (!hideDefaultFooter) {
-            this.setDefaultFooter();
-        }
+        if (setDefaultFooter) this.setDefaultFooter();
     }
 
     showBotThumbnail() {
-        this.setThumbnail(this.client.user.displayAvatarURL());
-        return this;
+        return this.setThumbnail(this.client.user.displayAvatarURL());
     }
 
-    setDefaultFooter(txt = '') {
-        this.setFooter(this.generateFooter(txt));
-        return this;
-    }
+    setDefaultFooter(text = '') {
+        let footerText = `v${this.client.bot.version}`;
 
-    generateFooter(txt = '') {
-        let footerTxt = `v${this.client.bot.version}`;
+        if (text !== '') footerText += ` | ${text}`;
 
-        if (txt !== '') {
-            footerTxt += ` | ${txt}`;
-        }
-
-        return { text: footerTxt, iconURL: this.client.user.displayAvatarURL() };
+        return this.setFooter({ text: footerText, iconURL: this.client.user.displayAvatarURL() });
     }
 }
 

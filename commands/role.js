@@ -98,8 +98,8 @@ module.exports = {
         const attachment = new MessageAttachment(pngBuffer, fileName);
 
         const embed = new client.bot.embeds.DefaultEmbed(client)
-            .setTitle(`Role information - ${role.name}`)
             .setColor(role.hexColor)
+            .setTitle(`Role information - ${role.name}`)
             .setThumbnail(`attachment://${fileName}`)
             .addField('Name', role.toString(), true)
             .addField('ID', role.id, true)
