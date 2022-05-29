@@ -32,9 +32,9 @@ const generateCommandHelpEmbed = (client, command) => {
         .addField('Usage', usageStr);
 };
 
-const generateCommandPageEmbed = (client, memberName) => {
+const generateCommandPageEmbed = client => {
     return new client.bot.embeds.DefaultEmbed(client)
-        .setTitle(`Help | ${memberName}`)
+        .setTitle('Command help')
         .setDescription('Use `/help (command)` for help with a specific command');
 };
 
@@ -82,7 +82,7 @@ module.exports = {
 
             // Create a new embed if it's a new page.
             if (pages[pageIndex] === undefined) {
-                pages[pageIndex] = generateCommandPageEmbed(client, interaction.member.displayName);
+                pages[pageIndex] = generateCommandPageEmbed(client);
             }
 
             // Add the command as a field in the embed.

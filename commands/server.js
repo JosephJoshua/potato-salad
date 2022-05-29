@@ -7,11 +7,6 @@ const boostTiers = {
     'TIER_3': 'Level 3',
 };
 
-const pluralize = (count, word, suffix = 's') => {
-    if (count === 1) return `${count} ${word}`;
-    return `${count} ${word}${suffix}`;
-};
-
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('server')
@@ -19,6 +14,7 @@ module.exports = {
 
     async execute(interaction) {
         const { client, guild } = interaction;
+        const pluralize = client.bot.formatter.pluralize;
 
         const owner = await guild.fetchOwner();
 
@@ -29,10 +25,10 @@ module.exports = {
         const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Server information - ${guild.name}`)
             .setThumbnail(guild.iconURL())
-            .addField('ID', guild.id, true)
-            .addField('Owner', owner.user.tag, true)
+            .addField('Owner', owner.user.toString(), true)
             .addField('Members', pluralize(guild.memberCount, 'member'), true)
-            .addField('Created At', client.bot.date.formatDate(guild.createdAt), true)
+            .addField('ID', guild.id, true)
+            .addField('Created At', client.bot.formatter.formatDate(guild.createdAt), true)
             .addField('Boosts', `${guild.premiumSubscriptionCount} (${boostTiers[guild.premiumTier]})`, true)
             .addField('Channels', `${pluralize(textCount, 'text channel')}\n${pluralize(voiceCount, 'voice channel')}`, true);
 

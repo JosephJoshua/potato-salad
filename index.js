@@ -41,7 +41,7 @@ const loadEvents = () => {
 client.bot = {};
 
 client.bot.colors = require('./helpers/colors');
-client.bot.date = require('./helpers/date');
+client.bot.formatter = require('./helpers/formatter');
 client.bot.embeds = require('./helpers/embeds');
 client.bot.logger = require('./helpers/logger');
 client.bot.pagination = require('./helpers/pagination');

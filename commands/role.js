@@ -106,7 +106,7 @@ module.exports = {
             .addField('Mentionable', isMentionable, true)
             .addField('Displayed Separately', isDisplayedSeparately, true)
             .addField('Color', role.hexColor, true)
-            .addField('Created At', client.bot.date.formatDate(role.createdAt), true);
+            .addField('Created At', client.bot.formatter.formatDate(role.createdAt), true);
 
         await interaction.reply({ embeds: [embed], files: [attachment] });
     },

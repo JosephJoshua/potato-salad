@@ -13,7 +13,7 @@ module.exports = {
         const { client } = interaction;
         const member = interaction.options.getMember('username') ?? interaction.member;
 
-        const boostingSince = member.premiumSince ? client.bot.date.formatDate(member.premiumSince) : 'Not Boosting';
+        const boostingSince = member.premiumSince ? client.bot.formatter.formatDate(member.premiumSince) : 'Not Boosting';
         const isInVoice = member.voice.channel ? 'Yes' : 'No';
 
         const EMBED_FIELD_LIMIT = 1024;
@@ -37,10 +37,10 @@ module.exports = {
         const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`User information - ${member.displayName}`)
             .setThumbnail(member.displayAvatarURL())
-            .addField('Username', member.user.tag, true)
+            .addField('Username', member.toString(), true)
+            .addField('Joined Server', client.bot.formatter.formatDate(member.joinedAt), true)
             .addField('ID', member.id, true)
-            .addField('Joined Server', client.bot.date.formatDate(member.joinedAt), true)
-            .addField('Joined Discord', client.bot.date.formatDate(member.user.createdAt), true)
+            .addField('Created At', client.bot.formatter.formatDate(member.user.createdAt), true)
             .addField('Boosting Since', boostingSince, true)
             .addField('In Voice', isInVoice, true)
             .addField(`Roles (${roleCount})`, roleNames.join(' '));
