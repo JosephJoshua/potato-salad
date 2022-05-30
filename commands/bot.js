@@ -12,7 +12,7 @@ module.exports = {
         const authors = await Promise.all([
             '694499855174992032',
             '217518123606081536',
-        ].map(id => client.users.fetch(id)));
+        ].map(async id => (await client.users.fetch(id)).tag));
 
         const memoryUsed = formatter.formatMemory(process.memoryUsage().heapUsed);
         const memoryTotal = formatter.formatMemory(process.memoryUsage().heapTotal);
