@@ -1,3 +1,5 @@
+const { performance } = require('node:perf_hooks');
+
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction) {
@@ -8,8 +10,10 @@ module.exports = {
             if (!command) return;
 
             try {
+                const startTime = performance.now();
                 await command.execute(interaction);
-                client.bot.logger.log(`${interaction.user.tag} executed /${interaction.commandName} in #${interaction.channel.name}`);
+                const endTime = performance.now();
+                client.bot.logger.logCommand(`${interaction.user.tag} executed /${interaction.commandName} in #${interaction.channel.name}`, Math.ceil(endTime - startTime));
             } catch (error) {
                 await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
                 throw error;

@@ -1,29 +1,42 @@
 const { redBright, greenBright, yellowBright, blueBright, magentaBright, cyanBright } = require('chalk');
 
-const formatISODate = () => {
-    return new Date().toISOString().replace(/T|Z/g, ' ').trim();
+const formatRuntime = runtime => {
+    if (runtime < 1000) {
+        return greenBright(`${runtime}ms`);
+    } else if (runtime < 3000) {
+        return yellowBright(`${runtime}ms`);
+    }
+    return redBright(`${runtime}ms`);
+};
+
+const formatISODate = date => {
+    return date.toISOString().replace(/T|Z/g, ' ').trim();
+};
+
+const formatLogInfo = text => {
+    return `[${formatISODate(new Date())}] ${text}`;
 };
 
 module.exports = {
     log: message => {
-        console.log(`[${formatISODate()}] LOG    `, message);
+        console.log(formatLogInfo('LOG'.padEnd(20)), message);
     },
     logError: message => {
-        console.log(`[${formatISODate()}] ${redBright('ERROR')}	 `, message);
+        console.log(formatLogInfo(redBright('ERROR').padEnd(20)), message);
     },
     logReady: message => {
-        console.log(`[${formatISODate()}] ${greenBright('READY')}	 `, message);
+        console.log(formatLogInfo(greenBright('READY').padEnd(20)), message);
     },
     logWarn: message => {
-        console.log(`[${formatISODate()}] ${yellowBright('WARN')}	 `, message);
+        console.log(formatLogInfo(yellowBright('WARN').padEnd(20)), message);
     },
     logLoad: message => {
-        console.log(`[${formatISODate()}] ${blueBright('LOAD')}	 `, message);
+        console.log(formatLogInfo(blueBright('LOAD').padEnd(20)), message);
     },
-    logCache: message => {
-        console.log(`[${formatISODate()}] ${magentaBright('CACHE')}	 `, message);
+    logCommand: (message, runtime) => {
+        console.log(formatLogInfo(magentaBright('COMMAND').padEnd(20)), message, formatRuntime(runtime));
     },
     logInit: message => {
-        console.log(`[${formatISODate()}] ${cyanBright('INIT')}	 `, message);
+        console.log(formatLogInfo(cyanBright('INIT').padEnd(20)), message);
     },
 };
