@@ -30,8 +30,8 @@ module.exports = {
     logWarn: message => {
         console.log(formatLogInfo(yellowBright('WARN').padEnd(20)), message);
     },
-    logLoad: message => {
-        console.log(formatLogInfo(blueBright('LOAD').padEnd(20)), message);
+    logLoad: (message, runtime) => {
+        console.log(formatLogInfo(blueBright('LOAD').padEnd(20)), message, formatRuntime(runtime));
     },
     logCommand: (message, runtime) => {
         console.log(formatLogInfo(magentaBright('COMMAND').padEnd(20)), message, formatRuntime(runtime));

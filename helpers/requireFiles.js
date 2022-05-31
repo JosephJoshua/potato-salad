@@ -1,15 +1,25 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const process = require('node:process');
+const { readdir } = require('node:fs/promises');
+const { resolve } = require('node:path');
+const { performance } = require('node:perf_hooks');
 
-module.exports = (dirName, func) => {
+const logger = require('./logger');
 
-    const dir = path.join(process.cwd(), dirName);
+async function* findFiles(dirPath) {
+    const dirents = await readdir(dirPath, { withFileTypes: true });
 
-    return fs.readdirSync(dir)
-        .filter(file => file.endsWith('.js'))
-        .map(file => {
-            const filePath = path.join(dir, file);
-            return func(require(filePath));
-        });
+    for (const dirent of dirents) {
+        const direntPath = resolve(dirPath, dirent.name);
+        if (dirent.isDirectory()) yield* findFiles(direntPath);
+        if (dirent.isFile() && dirent.name.endsWith('.js')) yield direntPath;
+    }
+}
+
+module.exports = async (dirName, func) => {
+
+    for await (const file of findFiles(dirName)) {
+        const startTime = performance.now();
+        const logMessage = func(require(file));
+        const endTime = performance.now();
+        logger.logLoad(logMessage, Math.ceil(endTime - startTime));
+    }
 };

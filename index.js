@@ -12,8 +12,8 @@ const loadCommands = () => {
     client.bot.commands = new Collection();
 
     client.bot.requireFiles('./commands', command => {
-        client.bot.logger.logLoad(`/${command.data.name}`);
         client.bot.commands.set(command.data.name, command);
+        return `Command /${command.data.name}`;
     });
 };
 
@@ -22,7 +22,6 @@ const loadEvents = () => {
     client.bot.events = new Collection();
 
     client.bot.requireFiles('./events', event => {
-        client.bot.logger.logLoad(`${event.name}`);
         client.bot.events.set(event.name, event);
 
         if (event.once) {
@@ -30,6 +29,8 @@ const loadEvents = () => {
         } else {
             client.on(event.name, (...args) => event.execute(...args));
         }
+
+        return `Event ${event.name}`;
     });
 
     client.on('warn', info => client.bot.logger.logWarn(info));
