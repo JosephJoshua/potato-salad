@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageAttachment } = require('discord.js');
 
-const sharp = require('sharp');
+const { Resvg } = require('@resvg/resvg-js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -92,7 +92,7 @@ module.exports = {
             </g>
           </svg>`;
 
-        const pngBuffer = await sharp(Buffer.from(badgeSvg)).png().toBuffer();
+        const pngBuffer = new Resvg(badgeSvg).render().asPng();
 
         const fileName = `${role.id}.png`;
         const attachment = new MessageAttachment(pngBuffer, fileName);

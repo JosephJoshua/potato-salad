@@ -222,7 +222,7 @@ const startGame = async (client, interaction, opponent = null) => {
             try {
                 await prevNotificationMsg.delete();
             } catch (err) {
-                if (err.code != 10008) {
+                if (err.code !== 10008) {
                     client.bot.logger.logError(err);
                 }
             }
