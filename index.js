@@ -11,7 +11,9 @@ const loadCommands = () => {
     client.bot.logger.logInit('Loading commands');
     client.bot.commands = new Collection();
 
-    client.bot.requireFiles('./commands', command => {
+    client.bot.requireFiles('./commands', (command, path, dir, file) => {
+        command.name = file;
+        command.category = dir;
         client.bot.commands.set(command.data.name, command);
         return `Command /${command.data.name}`;
     });

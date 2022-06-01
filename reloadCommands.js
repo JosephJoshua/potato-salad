@@ -11,9 +11,10 @@ const { CLIENT_ID, DISCORD_TOKEN, GUILD_ID } = process.env;
 
 logger.logInit('Loading commands');
 
-const commands = requireFiles('./commands', command => {
-    logger.logLoad(`/${command.data.name}`);
-    return command.data.toJSON();
+const commands = [];
+requireFiles('./commands', command => {
+    commands.push(command.data.toJSON());
+    return `/${command.data.name}`;
 });
 
 const rest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
