@@ -1,11 +1,11 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
-const boostTiers = {
+const BOOST_TIERS = Object.freeze({
     'NONE': 'Level 0',
     'TIER_1': 'Level 1',
     'TIER_2': 'Level 2',
     'TIER_3': 'Level 3',
-};
+});
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -29,7 +29,7 @@ module.exports = {
             .addField('Members', pluralize(guild.memberCount, 'member'), true)
             .addField('ID', guild.id, true)
             .addField('Created At', client.bot.formatter.formatDate(guild.createdAt), true)
-            .addField('Boosts', `${guild.premiumSubscriptionCount} (${boostTiers[guild.premiumTier]})`, true)
+            .addField('Boosts', `${guild.premiumSubscriptionCount} (${BOOST_TIERS[guild.premiumTier]})`, true)
             .addField('Channels', `${pluralize(textCount, 'text channel')}\n${pluralize(voiceCount, 'voice channel')}`, true);
 
         await interaction.reply({ embeds: [embed] });

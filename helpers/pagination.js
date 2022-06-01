@@ -112,7 +112,7 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
     });
 
     collector.on('end', async (_, reason) => {
-        if (reason !== 'messageDelete') {
+        if (reason === 'time') {
             // Limit the timeout string to show a maximum of 2 decimal places (in seconds).
             let timeoutStr = (timeout / 1000).toFixed(2);
             timeoutStr = Number.parseFloat(timeoutStr).toString();
