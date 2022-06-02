@@ -190,7 +190,7 @@ const startGame = async (client, interaction, opponent = null) => {
         fetchReply: true,
     });
 
-    const collector = await message.createMessageComponentCollector({ componentType: 'BUTTON', time: 120_000 });
+    const collector = await message.createMessageComponentCollector({ componentType: 'BUTTON', time: 300_000 });
 
     let turnCount = 0;
     let waitingForJoin = false; // If we're currently waiting for someone to join the game or not.
@@ -218,6 +218,8 @@ const startGame = async (client, interaction, opponent = null) => {
             }
         }
 
+        clearTimeout(notificationMsgTimeout);
+
         if (prevNotificationMsg !== null) {
             try {
                 await prevNotificationMsg.delete();
@@ -235,8 +237,6 @@ const startGame = async (client, interaction, opponent = null) => {
         actionRows[targetY].components[targetX].setLabel(turn).setDisabled(true);
 
         const winningLine = getWinningLine(board, turn, turnCount);
-
-        clearTimeout(notificationMsgTimeout);
 
         if (winningLine) {
             const moves = client.bot.formatter.pluralize(turnCount, 'move');
@@ -295,7 +295,7 @@ const startGame = async (client, interaction, opponent = null) => {
     collector.on('end', async (_, reason) => {
         if (reason === 'time') {
             const infoButton = new MessageButton()
-                .setLabel('Expired after 120 seconds')
+                .setLabel('Expired after 5 minutes')
                 .setCustomId('info')
                 .setStyle('SECONDARY')
                 .setDisabled(true);
@@ -344,10 +344,13 @@ const sendChallenge = async (client, interaction, player, opponent) => {
     const actionRow = new MessageActionRow().addComponents(buttons);
 
     const message = await interaction.editReply({
-        content: opponent.toString(),
         embeds: [embed],
         components: [actionRow],
         fetchReply: true,
+    });
+
+    await interaction.followUp({
+        content: `${opponent}, ${player} challenges you to a game of Tic-Tac-Toe!`,
     });
 
     const collector = await message.createMessageComponentCollector({ componentType: 'BUTTON', time: 300_000 });
