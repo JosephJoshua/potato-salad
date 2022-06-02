@@ -18,7 +18,6 @@ module.exports = {
         const memoryTotal = formatter.formatMemory(process.memoryUsage().heapTotal);
 
         const guildCount = formatter.pluralize(client.guilds.cache.size, 'server');
-        const memberCount = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
 
         const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Bot information - ${client.user.username}`)
@@ -31,7 +30,7 @@ module.exports = {
             .addField('Memory', `${memoryUsed}/${memoryTotal}`, true)
             .addField('Ping', `${client.ws.ping}ms`, true)
             .addField('Uptime', `${formatter.formatDuration(client.uptime)}`, true)
-            .addField('Servers', `${guildCount} with ${formatter.pluralize(memberCount, 'member')}`, true);
+            .addField('Servers', `${guildCount}`, true);
 
         await interaction.reply({ embeds: [embed] });
     },
