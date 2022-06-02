@@ -7,23 +7,18 @@ const { DISCORD_TOKEN, npm_package_version } = process.env;
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
 
-const loadCommands = () => {
-    client.bot.logger.logInit('Loading commands');
+const loadCommands = async () => {
     client.bot.commands = new Collection();
 
-    client.bot.requireFiles('./commands', (command, path, dir, file) => {
-        command.name = file;
-        command.category = dir;
-        client.bot.commands.set(command.data.name, command);
-        return `Command /${command.data.name}`;
+    await client.bot.requireFiles('commands', (command, { dir: category }) => {
+        client.bot.commands.set(command.data.name, { ...command, category });
     });
 };
 
-const loadEvents = () => {
-    client.bot.logger.logInit('Loading events');
+const loadEvents = async () => {
     client.bot.events = new Collection();
 
-    client.bot.requireFiles('./events', event => {
+    await client.bot.requireFiles('events', event => {
         client.bot.events.set(event.name, event);
 
         if (event.once) {
@@ -31,8 +26,6 @@ const loadEvents = () => {
         } else {
             client.on(event.name, (...args) => event.execute(...args));
         }
-
-        return `Event ${event.name}`;
     });
 
     client.on('warn', info => client.bot.logger.logWarn(info));
@@ -41,22 +34,21 @@ const loadEvents = () => {
     process.on('unhandledRejection', error => client.bot.logger.logError(error));
 };
 
-client.bot = {};
+(async () => {
+    client.bot = {};
 
-client.bot.colors = require('./helpers/colors');
-client.bot.formatter = require('./helpers/formatter');
-client.bot.embeds = require('./helpers/embeds');
-client.bot.logger = require('./helpers/logger');
-client.bot.pagination = require('./helpers/pagination');
-client.bot.requireFiles = require('./helpers/requireFiles');
+    await require('./helpers/requireFiles')('helpers', (helper, { name }) => {
+        client.bot[name] = helper;
+    });
 
-client.bot.version = npm_package_version ?? '1.0.0';
-if (npm_package_version == null) {
-    client.bot.logger.logWarn('Missing bot version, start with `npm start` instead');
-    client.bot.logger.logWarn(`Using v${client.bot.version} as fallback`);
-}
+    await loadEvents();
+    await loadCommands();
 
-loadCommands();
-loadEvents();
+    client.bot.version = npm_package_version ?? '1.0.0';
+    if (npm_package_version == null) {
+        client.bot.logger.logWarn('Missing bot version, start with `npm start` instead');
+        client.bot.logger.logWarn(`Using v${client.bot.version} as fallback`);
+    }
+})();
 
 client.login(DISCORD_TOKEN);
