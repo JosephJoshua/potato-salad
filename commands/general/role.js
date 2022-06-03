@@ -98,15 +98,14 @@ module.exports = {
         const attachment = new MessageAttachment(pngBuffer, fileName);
 
         const embed = new client.bot.embeds.DefaultEmbed(client)
-            .setColor(role.hexColor)
             .setTitle(`Role information - ${role.name}`)
             .setThumbnail(`attachment://${fileName}`)
             .addField('Name', role.toString(), true)
-            .addField('ID', role.id, true)
-            .addField('Mentionable', isMentionable, true)
-            .addField('Displayed Separately', isDisplayedSeparately, true)
             .addField('Color', role.hexColor, true)
-            .addField('Created At', client.bot.formatter.formatDate(role.createdAt), true);
+            .addField('ID', role.id, true)
+            .addField('Created At', client.bot.formatter.formatDate(role.createdAt), true)
+            .addField('Mentionable', isMentionable, true)
+            .addField('Displayed Separately', isDisplayedSeparately, true);
 
         await interaction.reply({ embeds: [embed], files: [attachment] });
     },
