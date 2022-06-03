@@ -7,17 +7,14 @@ module.exports = {
 
     async execute(interaction) {
         const { client } = interaction;
-        const formatter = client.bot.formatter;
+        const { formatDuration, formatMemory, pluralize } = client.bot.formatter;
 
         const authors = await Promise.all([
             '694499855174992032',
             '217518123606081536',
         ].map(async id => (await client.users.fetch(id)).tag));
 
-        const memoryUsed = formatter.formatMemory(process.memoryUsage().heapUsed);
-        const memoryTotal = formatter.formatMemory(process.memoryUsage().heapTotal);
-
-        const guildCount = formatter.pluralize(client.guilds.cache.size, 'server');
+        const { heapUsed, heapTotal } = process.memoryUsage();
 
         const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Bot information - ${client.user.username}`)
@@ -27,10 +24,10 @@ module.exports = {
             .addField('Bot ID', client.user.id, true)
             .addField('Library', 'discord.js', true)
             .addField('Library Version', require('discord.js').version, true)
-            .addField('Memory', `${memoryUsed}/${memoryTotal}`, true)
+            .addField('Memory', `${formatMemory(heapUsed)}/${formatMemory(heapTotal)}`, true)
             .addField('Ping', `${client.ws.ping}ms`, true)
-            .addField('Uptime', `${formatter.formatDuration(client.uptime)}`, true)
-            .addField('Servers', `${guildCount}`, true);
+            .addField('Uptime', formatDuration(client.uptime), true)
+            .addField('Servers', pluralize(client.guilds.cache.size, 'server'), true);
 
         await interaction.reply({ embeds: [embed] });
     },
