@@ -10,6 +10,30 @@ const formatDate = date => {
     return `${day} ${month} ${year}`;
 };
 
+const formatDuration = (duration, precision = 2) => {
+
+    const oneSecond = 1000;
+    const oneMinute = oneSecond * 60;
+    const oneHour = oneMinute * 60;
+    const oneDay = oneHour * 24;
+
+    if (duration < oneSecond) return `${duration} ms`;
+
+    const days = Math.floor(duration / oneDay);
+    const hours = Math.floor(duration % oneDay / oneHour);
+    const minutes = Math.floor(duration % oneHour / oneMinute);
+    const seconds = Math.floor(duration % oneMinute / oneSecond);
+
+    const output = [];
+
+    if (days || output.length) output.push(days ? pluralize(days, 'day') : '');
+    if (hours || output.length) output.push(hours ? pluralize(hours, 'hr') : '');
+    if (minutes || output.length) output.push(minutes ? pluralize(minutes, 'min') : '');
+    if (seconds || output.length) output.push(seconds ? pluralize(seconds, 'sec') : '');
+
+    return output.slice(0, precision).join(' ').trim();
+};
+
 const formatMemory = memory => {
     if (memory <= 0) return `${memory} B`;
 
@@ -30,40 +54,6 @@ const formatMemory = memory => {
     return `${value} ${units[unitIndex]}`;
 };
 
-const formatDuration = duration => {
-    const oneDay = 24 * 60 * 60 * 1000;
-    const oneHour = oneDay / 24;
-    const oneMinute = oneHour / 60;
-    const oneSecond = oneMinute / 60;
-
-    if (duration < oneSecond) return `${duration} ms`;
-
-    const days = Math.floor(duration / oneDay);
-    const hours = Math.floor((duration - days * oneDay) / oneHour);
-    const minutes = Math.floor((duration - days * oneDay - hours * oneHour) / oneMinute);
-    const seconds = Math.floor((duration - days * oneDay - hours * oneHour - minutes * oneMinute) / oneSecond);
-
-    const output = [];
-
-    if (days > 0) {
-        output.push(pluralize(days, 'day'));
-    }
-
-    if (hours > 0) {
-        output.push(pluralize(hours, 'hour'));
-    }
-
-    if (minutes > 0) {
-        output.push(pluralize(minutes, 'minute'));
-    }
-
-    if (seconds > 0) {
-        output.push(pluralize(seconds, 'second'));
-    }
-
-    return output.join(' ');
-};
-
 const pluralize = (count, word, suffix = 's') => {
     if (count === 1) return `${count} ${word}`;
     return `${count} ${word}${suffix}`;
@@ -71,7 +61,7 @@ const pluralize = (count, word, suffix = 's') => {
 
 module.exports = {
     formatDate,
-    formatMemory,
     formatDuration,
+    formatMemory,
     pluralize,
 };
