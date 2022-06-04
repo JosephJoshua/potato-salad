@@ -16,14 +16,11 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
         throw new Error('pages must not be null.');
     }
 
-    if (!interaction.deferred) {
-        await interaction.deferReply();
-    }
-
     // There's no need to show all the pagination stuff if there's only one page.
     if (pages.length === 1) {
         const page = await interaction.editReply({
             embeds: pages,
+            components: [],
             fetchReply: true,
         });
 
