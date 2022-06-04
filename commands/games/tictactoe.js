@@ -349,9 +349,23 @@ const sendChallenge = async (client, interaction, player, opponent) => {
         fetchReply: true,
     });
 
-    await interaction.followUp({
+    const followUp = await interaction.followUp({
         content: `${opponent}, ${player} challenges you to a game of Tic-Tac-Toe!`,
+        allowedMentions: {
+            users: [opponent.id],
+        },
+        fetchReply: true,
     });
+
+    const deleteFollowUp = async () => {
+        try {
+            await followUp.delete();
+        } catch (err) {
+            if (err.code !== 10008) {
+                client.bot.logger.logError(err);
+            }
+        }
+    };
 
     const collector = await message.createMessageComponentCollector({ componentType: 'BUTTON', time: 300_000 });
 
@@ -369,6 +383,7 @@ const sendChallenge = async (client, interaction, player, opponent) => {
         switch (i.customId) {
         case 'accept': {
             collector.stop('accepted');
+            await deleteFollowUp();
 
             await i.deferUpdate();
             await startGame(client, interaction, opponent);
@@ -378,6 +393,7 @@ const sendChallenge = async (client, interaction, player, opponent) => {
 
         case 'decline': {
             collector.stop('declined');
+            await deleteFollowUp();
 
             infoButton.setLabel('Challenge was declined');
             buttons.forEach(button => button.setDisabled(true));
@@ -397,6 +413,8 @@ const sendChallenge = async (client, interaction, player, opponent) => {
 
     collector.on('end', async (_, reason) => {
         if (reason === 'time') {
+            await deleteFollowUp();
+
             infoButton.setLabel('Expired after 5 minutes');
             buttons.forEach(button => button.setDisabled(true));
 
