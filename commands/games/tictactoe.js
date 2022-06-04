@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder, bold } = require('@discordjs/builders');
 const { createCanvas } = require('canvas');
 const { MessageAttachment, MessageButton, MessageActionRow } = require('discord.js');
 
@@ -145,7 +145,7 @@ const generateEmbedDescription = (turn, player, opponent) => {
     if (opponent === null) opponent = '???';
 
     const turnInfo = `It's ${turn === PLAYERS.x ? player : opponent}'s turn! Use the buttons below to make a move.`;
-    const description = `**${player} (X) vs. ${opponent} (O)**\n\n${turnInfo}`;
+    const description = bold(`${player} (X) vs. ${opponent} (O)\n\n`) + turnInfo;
 
     return description;
 };
@@ -247,7 +247,7 @@ const startGame = async (client, interaction, opponent = null) => {
 
             const description = winningLine.length === 0 ? 'It was a tie!' : `${getCurrentPlayer()} won the game after a total of ${moves}!`;
 
-            embed.setDescription(`**${player} (X) vs. ${opponent} (O)**\n\n${description}`)
+            embed.setDescription(bold(`${player} (X) vs. ${opponent} (O)\n\n`) + description)
                 .setImage(`attachment://${canvasFileName}`);
 
             collector.stop('won');
@@ -266,7 +266,7 @@ const startGame = async (client, interaction, opponent = null) => {
         if (opponent === null) {
             // Runs once when the game is started without an opponent and the
             // player makes the first move.
-            embed.setDescription(`**${player} (X) vs. ??? (O)**\n
+            embed.setDescription(bold(`${player} (X) vs. ??? (O)\n`) + `
                 Waiting for someone to join the game...
                 You can join the game by using the buttons below to make a move!`);
 

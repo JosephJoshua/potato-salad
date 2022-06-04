@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, SlashCommandSubcommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder, SlashCommandSubcommandBuilder, inlineCode, bold } = require('@discordjs/builders');
 
 const COMMANDS_PER_PAGE = 10;
 
@@ -57,7 +57,8 @@ const getAllCmdsWithSubcmds = client => {
 const generateUnknownCommandEmbed = (client, commandName) => {
     return new client.bot.embeds.DefaultEmbed(client)
         .setTitle('Command help')
-        .setDescription(`There's no command called "${commandName}"!\nYou can look at a list of all the commands using \`/help\``)
+        .setDescription(`There's no command called "${commandName}"!
+            You can look at a list of all the commands using ${inlineCode('/help all')}`)
         .showBotThumbnail();
 };
 
@@ -65,7 +66,7 @@ const generateCommandHelpEmbed = (client, command) => {
     const optionStr = optionsToString(command.data.options);
 
     // Remove any trailing spaces in case there weren't any options.
-    const usageStr = `\`/${command.data.name} ${optionStr}`.trimEnd() + '`';
+    const usageStr = inlineCode(`/${command.data.name} ${optionStr}`.trimEnd());
 
     return new client.bot.embeds.DefaultEmbed(client)
         .setTitle('Command help')
@@ -79,7 +80,7 @@ const generateCommandPageEmbed = (client, category = '') => {
 
     return new client.bot.embeds.DefaultEmbed(client)
         .setTitle(`Command help ${categoryText}`)
-        .setDescription('Use `/help command (command)` for help with a specific command\n\n');
+        .setDescription(`Use ${inlineCode('/help command (command)')} for help with a specific command`);
 };
 
 const generateCommandPages = (client, commands, category = '') => {
@@ -107,7 +108,7 @@ const generateCommandPages = (client, commands, category = '') => {
     }
 
     // Add notes to the last field of every page.
-    const notes = '\n\n**() = optional | [] = required**';
+    const notes = '\n\n' + bold('() = optional | [] = required');
     pages.forEach(page => {
         page.fields[page.fields.length - 1].value += notes;
     });
