@@ -15,7 +15,7 @@ module.exports = {
 
         const embed = new client.bot.embeds.DefaultEmbed(client)
             .setTitle(`Avatar - ${member.displayName}`)
-            .setImage(member.displayAvatarURL());
+            .setImage(member.displayAvatarURL({ size: 4096 }));
 
         await interaction.reply({ embeds: [embed] });
     },
