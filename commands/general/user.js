@@ -25,7 +25,7 @@ module.exports = {
 
         const roles = member.roles.cache;
         let roleNames = roles
-            .filter(r => r.position) // exclude @everyone
+            .filter(r => r.position) // Exclude @everyone at position 0.
             .map(r => r.toString());
 
         const roleCount = roleNames.length;

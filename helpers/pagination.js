@@ -8,13 +8,13 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
 
     const { client } = interaction;
 
-    if (!interaction) {
+    if (!interaction)
         throw new Error('interaction must not be null.');
-    }
 
-    if (!pages) {
+
+    if (!pages)
         throw new Error('pages must not be null.');
-    }
+
 
     // There's no need to show all the pagination stuff if there's only one page.
     if (pages.length === 1) {
@@ -67,36 +67,35 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
 
     collector.on('collect', async i => {
         switch (i.customId) {
-        case prevButtonId: {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
+            case prevButtonId: {
+                if (currentPageIndex > 0)
+                    currentPageIndex--;
+
+                break;
             }
 
-            break;
-        }
+            case nextButtonId: {
+                if (currentPageIndex < pages.length - 1)
+                    currentPageIndex++;
 
-        case nextButtonId: {
-            if (currentPageIndex < pages.length - 1) {
-                currentPageIndex++;
+
+                break;
             }
 
-            break;
+            default: break;
         }
 
-        default: break;
-        }
-
-        if (currentPageIndex === 0) {
+        if (currentPageIndex === 0)
             prevBtn.setDisabled(true);
-        } else if (prevBtn.disabled) {
+        else if (prevBtn.disabled)
             prevBtn.setDisabled(false);
-        }
 
-        if (currentPageIndex === pages.length - 1) {
+
+        if (currentPageIndex === pages.length - 1)
             nextBtn.setDisabled(true);
-        } else if (nextBtn.disabled) {
+        else if (nextBtn.disabled)
             nextBtn.setDisabled(false);
-        }
+
 
         await i.deferUpdate();
         await i.editReply({
@@ -124,11 +123,11 @@ const paginatedEmbed = async (interaction, pages, timeout = 120_000) => {
             } catch (err) {
                 // 10008: Unknown Message
                 // The message has been deleted so we can just ignore it.
-                if (err.code === 10008) {
+                if (err.code === 10008)
                     client.bot.logger.log(`Paginated embed with ${pages.length} pages was deleted.`);
-                } else {
+                else
                     client.bot.logger.logError(err);
-                }
+
 
                 return;
             }

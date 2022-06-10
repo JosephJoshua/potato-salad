@@ -9,11 +9,11 @@ const formatLogInfo = text => {
 };
 
 const formatRuntime = runtime => {
-    if (runtime < 1000) {
+    if (runtime < 1000)
         return greenBright(`${runtime}ms`);
-    } else if (runtime < 3000) {
+    else if (runtime < 3000)
         return yellowBright(`${runtime}ms`);
-    }
+
     return redBright(`${runtime}ms`);
 };
 

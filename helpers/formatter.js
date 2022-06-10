@@ -44,8 +44,7 @@ const formatMemory = memory => {
     // Take the log base 1024 of the memory to figure out the largest unit we can convert it to.
     const unitIndex = Math.floor(Math.log(memory) / Math.log(1024));
 
-    // The amount of bytes 1 of the target unit represents.
-    // e.g 1 kB = 1024 B
+    // The amount of bytes 1 of the target unit represents, e.g. 1 kB = 1024 B.
     const oneOfUnit = Math.pow(1024, unitIndex);
 
     // Convert the memory passed in to the target unit.

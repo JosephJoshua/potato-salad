@@ -20,9 +20,8 @@ module.exports = {
 
             if (!command) return;
 
-            if (typeof command.handleAutocomplete === 'function') {
-                await command.handleAutocomplete(interaction);
-            }
+            if (typeof command.handleAutocomplete === 'function')
+                command.handleAutocomplete(interaction);
         }
     },
 };
