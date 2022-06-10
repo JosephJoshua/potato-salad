@@ -21,17 +21,22 @@ const loadEvents = async () => {
     await client.bot.requireFiles('events', event => {
         client.bot.events.set(event.name, event);
 
-        if (event.once) {
+        if (event.once)
             client.once(event.name, (...args) => event.execute(...args));
-        } else {
+        else
             client.on(event.name, (...args) => event.execute(...args));
-        }
+
     });
 
     client.on('warn', info => client.bot.logger.logWarn(info));
     client.on('error', error => client.bot.logger.logError(error));
 
-    process.on('unhandledRejection', error => client.bot.logger.logError(error));
+    process.on('unhandledRejection', error => {
+        // 10008: Unknown Message
+        // The message has been deleted so we can just ignore it.
+        if (error.code == 10008) return;
+        client.bot.logger.logError(error);
+    });
 };
 
 (async () => {
