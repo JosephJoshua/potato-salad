@@ -168,16 +168,14 @@ const getWinningLine = (boardButtons, turnCount) => {
 
     // Horizontal n-in-a-row.
     const horizontalIndex = board.map(row => row.reduce((a, b) => a + b))
-        .map(total => [-BOARD_SIZE, BOARD_SIZE].some(size => total == size))
-        .indexOf(true);
+        .findIndex(total => [-BOARD_SIZE, BOARD_SIZE].some(size => total == size));
 
     if (~horizontalIndex)
         return [...Array(BOARD_SIZE).keys()].map(index => horizontalIndex * BOARD_SIZE + index);
 
     // Vertical n-in-a-row.
     const verticalIndex = board.reduce((row1, row2) => row1.map((val, index) => val + row2[index]))
-        .map(total => [-BOARD_SIZE, BOARD_SIZE].some(size => total == size))
-        .indexOf(true);
+        .findIndex(total => [-BOARD_SIZE, BOARD_SIZE].some(size => total == size));
 
     if (~verticalIndex)
         return [...Array(BOARD_SIZE).keys()].map(index => index * BOARD_SIZE + verticalIndex);
