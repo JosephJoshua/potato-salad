@@ -49,6 +49,13 @@ const loadEvents = async () => {
     await loadEvents();
     await loadCommands();
 
+    // If there is a maintenance coming soon or not.
+    client.bot.maintenance = false;
+    client.bot.authors = [
+        '694499855174992032',
+        '217518123606081536',
+    ];
+
     client.bot.version = npm_package_version ?? '1.0.0';
     if (npm_package_version == null) {
         client.bot.logger.logWarn('Missing bot version, start with `npm start` instead');

@@ -9,10 +9,8 @@ module.exports = {
         const { client } = interaction;
         const { formatDuration, formatMemory, pluralize } = client.bot.formatter;
 
-        const authors = await Promise.all([
-            '694499855174992032',
-            '217518123606081536',
-        ].map(async id => (await client.users.fetch(id)).tag));
+        const authors = await Promise.all(client.bot.authors
+            .map(async id => (await client.users.fetch(id)).tag));
 
         const { heapUsed, heapTotal } = process.memoryUsage();
 
