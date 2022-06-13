@@ -1,4 +1,5 @@
-const formatDate = date => {
+export const formatDate = date => {
+
     const monthStrings = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
@@ -10,7 +11,7 @@ const formatDate = date => {
     return `${day} ${month} ${year}`;
 };
 
-const formatDuration = (duration, precision = 2) => {
+export const formatDuration = (duration, precision = 2) => {
 
     const oneSecond = 1000;
     const oneMinute = oneSecond * 60;
@@ -34,7 +35,8 @@ const formatDuration = (duration, precision = 2) => {
     return output.slice(0, precision).join(' ').trim();
 };
 
-const formatMemory = memory => {
+export const formatMemory = memory => {
+
     if (memory <= 0) return `${memory} B`;
 
     const units = [
@@ -53,14 +55,7 @@ const formatMemory = memory => {
     return `${value} ${units[unitIndex]}`;
 };
 
-const pluralize = (count, word, suffix = 's') => {
+export const pluralize = (count, word, suffix = 's') => {
     if (count === 1) return `${count} ${word}`;
     return `${count} ${word}${suffix}`;
-};
-
-module.exports = {
-    formatDate,
-    formatDuration,
-    formatMemory,
-    pluralize,
 };

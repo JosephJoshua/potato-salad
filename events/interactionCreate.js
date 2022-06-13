@@ -1,35 +1,42 @@
-module.exports = {
-    name: 'interactionCreate',
-    async execute(interaction) {
-        if (interaction.isCommand()) {
-            const { client } = interaction;
-            const command = client.bot.commands.get(interaction.commandName);
+import DefaultEmbed from '../helpers/embeds.js';
+import { logCommand } from '../helpers/logger.js';
+import time from '../helpers/time.js';
 
-            if (!command) return;
-            if (client.bot.maintenance) {
-                return await interaction.reply({ embeds: [
-                    new client.bot.embeds.DefaultEmbed(client)
-                        .setTitle('Bot maintenance')
-                        .setDescription('I\'m currently under maintenance! I know you\'ll miss me a lot so I\'ll try my best to come back as soon as possible!')
-                        .showBotThumbnail(),
-                ] });
-            }
+const generateMaintenanceEmbed = client => {
+    return new DefaultEmbed(client)
+        .setTitle('Maintenance break')
+        .setDescription('I\'m currently under maintenance! I know you\'ll miss me a lot so I\'ll come back as soon as possible!')
+        .setBotThumbnail();
+};
 
-            try {
-                const runtime = await client.bot.time(async () => await command.execute(interaction));
-                client.bot.logger.logCommand(`${interaction.user.tag} executed /${interaction.commandName} in #${interaction.channel.name}`, runtime);
-            } catch (error) {
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-                throw error;
-            }
-        } else if (interaction.isAutocomplete()) {
-            const { client } = interaction;
-            const command = client.bot.commands.get(interaction.commandName);
+export default async interaction => {
 
-            if (!command) return;
+    if (interaction.isCommand()) {
 
-            if (typeof command.handleAutocomplete === 'function')
-                command.handleAutocomplete(interaction);
+        const { client } = interaction;
+        const command = client.bot.commands.get(interaction.commandName);
+
+        if (!command) return;
+
+        if (client.bot.maintenance)
+            return interaction.reply({ embeds: [generateMaintenanceEmbed(client)] });
+
+        try {
+            const runtime = await time(async () => await command.execute(interaction));
+            logCommand(`${interaction.user.tag} executed /${interaction.commandName} in #${interaction.channel.name}`, runtime);
+        } catch (error) {
+            interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            throw error;
         }
-    },
+
+    } else if (interaction.isAutocomplete()) {
+
+        const { client } = interaction;
+        const command = client.bot.commands.get(interaction.commandName);
+
+        if (!command) return;
+
+        if (typeof command.handleAutocomplete === 'function')
+            command.handleAutocomplete(interaction);
+    }
 };

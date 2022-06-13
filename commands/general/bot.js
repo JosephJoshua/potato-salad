@@ -1,32 +1,33 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('bot')
-        .setDescription('Shows the bot\'s information'),
+import DefaultEmbed from '../../helpers/embeds.js';
+import { formatDuration, formatMemory, pluralize } from '../../helpers/formatter.js';
 
-    async execute(interaction) {
-        const { client } = interaction;
-        const { formatDuration, formatMemory, pluralize } = client.bot.formatter;
+export const data = new SlashCommandBuilder()
+    .setName('bot')
+    .setDescription('Shows the bot\'s information');
 
-        const authors = await Promise.all(client.bot.authors
-            .map(async id => (await client.users.fetch(id)).tag));
+export const execute = async interaction => {
 
-        const { heapUsed, heapTotal } = process.memoryUsage();
+    const { client } = interaction;
 
-        const embed = new client.bot.embeds.DefaultEmbed(client)
-            .setTitle(`Bot information - ${client.user.username}`)
-            .showBotThumbnail()
-            .addField('Authors', authors.join('\n'), true)
-            .addField('Bot Version', `v${client.bot.version}`, true)
-            .addField('Bot ID', client.user.id, true)
-            .addField('Library', 'discord.js', true)
-            .addField('Library Version', require('discord.js').version, true)
-            .addField('Memory', `${formatMemory(heapUsed)}/${formatMemory(heapTotal)}`, true)
-            .addField('Ping', `${client.ws.ping}ms`, true)
-            .addField('Uptime', formatDuration(client.uptime), true)
-            .addField('Servers', pluralize(client.guilds.cache.size, 'server'), true);
+    const authors = await Promise.all(client.bot.authors
+        .map(async id => (await client.users.fetch(id)).tag));
 
-        await interaction.reply({ embeds: [embed] });
-    },
+    const { heapUsed, heapTotal } = process.memoryUsage();
+
+    const embed = new DefaultEmbed(client)
+        .setTitle(`Bot information - ${client.user.username}`)
+        .setBotThumbnail()
+        .addField('Authors', authors.join('\n'), true)
+        .addField('Bot Version', `v${client.bot.version}`, true)
+        .addField('Bot ID', client.user.id, true)
+        .addField('Library', 'discord.js', true)
+        .addField('Library Version', client.bot.libraryVersion, true)
+        .addField('Memory', `${formatMemory(heapUsed)}/${formatMemory(heapTotal)}`, true)
+        .addField('Ping', `${client.ws.ping}ms`, true)
+        .addField('Uptime', formatDuration(client.uptime), true)
+        .addField('Servers', pluralize(client.guilds.cache.size, 'server'), true);
+
+    interaction.reply({ embeds: [embed] });
 };

@@ -1,22 +1,23 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+import { SlashCommandBuilder } from '@discordjs/builders';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('Shows the bot\'s ping'),
+import DefaultEmbed from '../../helpers/embeds.js';
 
-    async execute(interaction) {
-        const { client } = interaction;
+export const data = new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription('Shows the bot\'s ping');
 
-        const embed = new client.bot.embeds.DefaultEmbed(client).setTitle('Pong!');
-        const reply = await interaction.reply({ embeds: [embed], fetchReply: true });
+export const execute = async interaction => {
 
-        const replyEmbed = new client.bot.embeds.DefaultEmbed(client)
-            .setTitle('Pong!')
-            .showBotThumbnail()
-            .addField('API', `${client.ws.ping}ms`)
-            .addField('Latency', `${reply.createdTimestamp - interaction.createdTimestamp}ms`);
+    const { client } = interaction;
 
-        await interaction.editReply({ embeds: [replyEmbed] });
-    },
+    const embed = new DefaultEmbed(client).setTitle('Pong!');
+    const reply = await interaction.reply({ embeds: [embed], fetchReply: true });
+
+    const replyEmbed = new DefaultEmbed(client)
+        .setTitle('Pong!')
+        .setBotThumbnail()
+        .addField('API', `${client.ws.ping}ms`)
+        .addField('Latency', `${reply.createdTimestamp - interaction.createdTimestamp}ms`);
+
+    interaction.editReply({ embeds: [replyEmbed] });
 };

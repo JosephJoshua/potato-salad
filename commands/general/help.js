@@ -1,4 +1,7 @@
-const { SlashCommandBuilder, SlashCommandSubcommandBuilder, inlineCode, bold } = require('@discordjs/builders');
+import { bold, inlineCode, SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
+
+import DefaultEmbed from '../../helpers/embeds.js';
+import paginatedEmbed from '../../helpers/pagination.js';
 
 const COMMANDS_PER_PAGE = 10;
 
@@ -17,6 +20,7 @@ const toTitleCase = str => {
 };
 
 const optionsToString = options => {
+
     return options.map(option => {
         if (option.required)
             return `[${option.name}]`;
@@ -27,6 +31,7 @@ const optionsToString = options => {
 };
 
 const getWithSubcommands = commands => {
+
     let allCommands = [];
 
     const isSubcommand = option => {
@@ -48,6 +53,7 @@ const getWithSubcommands = commands => {
 };
 
 const getAllCmdsWithSubcmds = client => {
+
     if (allCmdsWithSubcmds !== null) return allCmdsWithSubcmds;
 
     allCmdsWithSubcmds = getWithSubcommands(client.bot.commands);
@@ -55,35 +61,38 @@ const getAllCmdsWithSubcmds = client => {
 };
 
 const generateUnknownCommandEmbed = (client, commandName) => {
-    return new client.bot.embeds.DefaultEmbed(client)
+    return new DefaultEmbed(client)
         .setTitle('Command help')
         .setDescription(`There's no command called "${commandName}"!
             You can look at a list of all the commands using ${inlineCode('/help all')}`)
-        .showBotThumbnail();
+        .setBotThumbnail();
 };
 
 const generateCommandHelpEmbed = (client, command) => {
+
     const optionStr = optionsToString(command.data.options);
 
     // Remove any trailing spaces in case there weren't any options.
     const usageStr = inlineCode(`/${command.data.name} ${optionStr}`.trimEnd());
 
-    return new client.bot.embeds.DefaultEmbed(client)
+    return new DefaultEmbed(client)
         .setTitle('Command help')
-        .showBotThumbnail()
+        .setBotThumbnail()
         .addField(`/${command.data.name}`, command.data.description)
         .addField('Usage', usageStr);
 };
 
 const generateCommandPageEmbed = (client, category = '') => {
+
     const categoryText = (category === '' ? '' : '| ') + category;
 
-    return new client.bot.embeds.DefaultEmbed(client)
+    return new DefaultEmbed(client)
         .setTitle(`Command help ${categoryText}`)
         .setDescription(`Use ${inlineCode('/help command (command)')} for help with a specific command`);
 };
 
 const generateCommandPages = (client, commands, category = '') => {
+
     const pages = [];
     let pageIndex = 0;
 
@@ -114,115 +123,113 @@ const generateCommandPages = (client, commands, category = '') => {
     return pages;
 };
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('help')
-        .setDescription('Provides help on available commands')
-        .addSubcommand(subcommand =>
-            subcommand.setName('category')
-                .setDescription('Get all the commands in a category')
-                .addStringOption(option =>
-                    option.setName('category')
-                        .setDescription('Name of the category')
-                        .setAutocomplete(true)
-                        .setRequired(true)))
+export const data = new SlashCommandBuilder()
+    .setName('help')
+    .setDescription('Provides help on available commands')
+    .addSubcommand(subcommand =>
+        subcommand.setName('category')
+            .setDescription('Get all the commands in a category')
+            .addStringOption(option =>
+                option.setName('category')
+                    .setDescription('Name of the category')
+                    .setAutocomplete(true)
+                    .setRequired(true)))
+    .addSubcommand(subcommand =>
+        subcommand.setName('command')
+            .setDescription('Get information about a specific command')
+            .addStringOption(option =>
+                option.setName('command')
+                    .setDescription('Name of the command to get information on')
+                    .setAutocomplete(true)
+                    .setRequired(true)))
+    .addSubcommand(subcommand =>
+        subcommand.setName('all')
+            .setDescription('Shows all available commands'));
 
-        .addSubcommand(subcommand =>
-            subcommand.setName('command')
-                .setDescription('Get information about a specific command')
-                .addStringOption(option =>
-                    option.setName('command')
-                        .setDescription('Name of the command to get information on')
-                        .setAutocomplete(true)
-                        .setRequired(true)))
+export const execute = async interaction => {
 
-        .addSubcommand(subcommand =>
-            subcommand.setName('all')
-                .setDescription('Shows all available commands')),
+    const { client } = interaction;
+    const subcommand = interaction.options.getSubcommand();
 
-    async execute(interaction) {
-        const { client } = interaction;
-        const subcommand = interaction.options.getSubcommand();
+    // Handle category command help (/help category [category]).
+    if (subcommand === 'category') {
+        const category = interaction.options.getString('category', true);
+        const categoryCommands = client.bot.commands.filter(command => command.category === category);
 
-        // Handle category command help (/help category [category]).
-        if (subcommand === 'category') {
-            const category = interaction.options.getString('category', true);
-            const categoryCommands = client.bot.commands.filter(command => command.category === category);
+        const pages = generateCommandPages(client, categoryCommands, toTitleCase(category));
 
-            const pages = generateCommandPages(client, categoryCommands, toTitleCase(category));
+        await interaction.deferReply();
+        await paginatedEmbed(interaction, pages);
 
-            await interaction.deferReply();
-            await client.bot.pagination.paginatedEmbed(interaction, pages);
+        return;
+    }
 
-            return;
+    // Handle single command help [/help (command)].
+    if (subcommand === 'command') {
+        const commandName = interaction.options.getString('command', true);
+        const command = getAllCmdsWithSubcmds(client).find(c => c.data.name === commandName);
+
+        if (command === undefined) {
+            const embed = generateUnknownCommandEmbed(client, commandName);
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        } else {
+            const embed = generateCommandHelpEmbed(client, command);
+            await interaction.reply({ embeds: [embed] });
         }
 
-        // Handle single command help [/help (command)].
-        if (subcommand === 'command') {
-            const commandName = interaction.options.getString('command', true);
-            const command = getAllCmdsWithSubcmds(client).find(c => c.data.name === commandName);
+        return;
+    }
 
-            if (command === undefined) {
-                const embed = generateUnknownCommandEmbed(client, commandName);
-                await interaction.reply({ embeds: [embed], ephemeral: true });
-            } else {
-                const embed = generateCommandHelpEmbed(client, command);
-                await interaction.reply({ embeds: [embed] });
-            }
+    // Handle command list help (/help all).
+    if (subcommand === 'all') {
+        await interaction.deferReply();
+        await paginatedEmbed(
+            interaction,
+            generateCommandPages(client, client.bot.commands),
+        );
+    }
+};
 
-            return;
+export const handleAutocomplete = async interaction => {
+
+    const { client } = interaction;
+
+    const focusedOption = interaction.options.getFocused(true);
+    const query = focusedOption.value.trim().toLowerCase();
+
+    let suggestions = null;
+
+    if (focusedOption.name === 'command') {
+        if (autocompleteCommands === null) {
+            autocompleteCommands = getAllCmdsWithSubcmds(client)
+                .map(command => {
+                    return {
+                        name: `/${command.data.name}`, value: command.data.name,
+                    };
+                });
         }
 
-        // Handle command list help (/help all).
-        if (subcommand === 'all') {
-            await interaction.deferReply();
-            await client.bot.pagination.paginatedEmbed(
-                interaction,
-                generateCommandPages(client, client.bot.commands),
+        suggestions = autocompleteCommands;
+
+    } else if (focusedOption.name === 'category') {
+        if (autocompleteCategories === null) {
+            autocompleteCategories = Array.from(new Set(client.bot.commands.map(command => command.category))).map(
+                category => {
+                    return {
+                        name: toTitleCase(category), value: category,
+                    };
+                },
             );
         }
-    },
 
-    async handleAutocomplete(interaction) {
-        const { client } = interaction;
+        suggestions = autocompleteCategories;
+    }
 
-        const focusedOption = interaction.options.getFocused(true);
-        const query = focusedOption.value.trim().toLowerCase();
+    // We only want to filter the list if the user has typed something.
+    if (query !== '')
+        suggestions = suggestions.filter(suggestion => suggestion.name.toLowerCase().includes(query));
 
-        let suggestions = null;
-
-        if (focusedOption.name === 'command') {
-            if (autocompleteCommands === null) {
-                autocompleteCommands = getAllCmdsWithSubcmds(client)
-                    .map(command => {
-                        return {
-                            name: `/${command.data.name}`, value: command.data.name,
-                        };
-                    });
-            }
-
-            suggestions = autocompleteCommands;
-
-        } else if (focusedOption.name === 'category') {
-            if (autocompleteCategories === null) {
-                autocompleteCategories = Array.from(new Set(client.bot.commands.map(command => command.category))).map(
-                    category => {
-                        return {
-                            name: toTitleCase(category), value: category,
-                        };
-                    },
-                );
-            }
-
-            suggestions = autocompleteCategories;
-        }
-
-        // We only want to filter the list if the user has typed something.
-        if (query !== '')
-            suggestions = suggestions.filter(suggestion => suggestion.name.toLowerCase().includes(query));
-
-        // Sort suggestions alphabetically.
-        suggestions = suggestions.sort((a, b) => a.name.localeCompare(b.name));
-        await interaction.respond(suggestions);
-    },
+    // Sort suggestions alphabetically.
+    suggestions = suggestions.sort((a, b) => a.name.localeCompare(b.name));
+    await interaction.respond(suggestions);
 };

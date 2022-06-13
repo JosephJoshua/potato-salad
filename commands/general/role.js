@@ -1,26 +1,28 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageAttachment } = require('discord.js');
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { Resvg } from '@resvg/resvg-js';
+import { MessageAttachment } from 'discord.js';
 
-const { Resvg } = require('@resvg/resvg-js');
+import DefaultEmbed from '../../helpers/embeds.js';
+import { formatDate } from '../../helpers/formatter.js';
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('role')
-        .setDescription('Shows a role\'s information')
-        .addRoleOption(option =>
-            option.setName('role')
-                .setDescription('Select a role')
-                .setRequired(true),
-        ),
+export const data = new SlashCommandBuilder()
+    .setName('role')
+    .setDescription('Shows a role\'s information')
+    .addRoleOption(option =>
+        option.setName('role')
+            .setDescription('Select a role')
+            .setRequired(true),
+    );
 
-    async execute(interaction) {
-        const { client } = interaction;
-        const role = interaction.options.getRole('role');
+export const execute = interaction => {
 
-        const isMentionable = role.mentionable ? 'Yes' : 'No';
-        const isDisplayedSeparately = role.hoist ? 'Yes' : 'No';
+    const { client } = interaction;
+    const role = interaction.options.getRole('role');
 
-        const svgStr = `
+    const isMentionable = role.mentionable ? 'Yes' : 'No';
+    const isDisplayedSeparately = role.hoist ? 'Yes' : 'No';
+
+    const svgStr = `
         <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g>
             <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3137 75.3137C5.06531 69.0653 5.06532 58.9347 11.3137 52.6863L18.7452 45.2548V34.7452C18.7452 25.9086 25.9086 18.7452 34.7452 18.7452H45.2548L52.6863 11.3137C58.9347 5.06531 69.0653 5.06532 75.3137 11.3137L82.7452 18.7452H93.2549C102.091 18.7452 109.255 25.9086 109.255 34.7452V45.2548L116.686 52.6863C122.935 58.9347 122.935 69.0653 116.686 75.3137L109.255 82.7452V93.2548C109.255 102.091 102.091 109.255 93.2548 109.255H82.7452L75.3137 116.686C69.0653 122.935 58.9347 122.935 52.6863 116.686L45.2548 109.255H34.7452C25.9086 109.255 18.7452 102.091 18.7452 93.2548V82.7452L11.3137 75.3137ZM58.9063 87C60.4688 87 61.4896 87.0833 61.9688 87.25C62.3021 86.8333 62.4688 86.1458 62.4688 85.1875C62.4688 84.625 62.1563 84.1771 61.5313 83.8437C61.2188 83.6771 60.8333 83.5417 60.375 83.4375C59.9375 83.3125 59.4792 83.1979 59 83.0937C58.5208 82.9896 58.1354 82.875 57.8438 82.75C56.9271 82.3125 56.4688 81.2708 56.4688 79.625V47.7188C56.5104 45.7396 56.9479 44.3958 57.7813 43.6875C58.6146 42.9375 60.2813 42.5625 62.7813 42.5625C66.5729 42.6042 
@@ -30,21 +32,20 @@ module.exports = {
         </svg>
         `;
 
-        const pngBuffer = new Resvg(svgStr).render().asPng();
+    const pngBuffer = new Resvg(svgStr).render().asPng();
 
-        const fileName = `${role.id}.png`;
-        const attachment = new MessageAttachment(pngBuffer, fileName);
+    const fileName = `${role.id}.png`;
+    const attachment = new MessageAttachment(pngBuffer, fileName);
 
-        const embed = new client.bot.embeds.DefaultEmbed(client)
-            .setTitle(`Role information - ${role.name}`)
-            .setThumbnail(`attachment://${fileName}`)
-            .addField('Name', role.toString(), true)
-            .addField('Color', role.hexColor, true)
-            .addField('ID', role.id, true)
-            .addField('Created At', client.bot.formatter.formatDate(role.createdAt), true)
-            .addField('Mentionable', isMentionable, true)
-            .addField('Displayed Separately', isDisplayedSeparately, true);
+    const embed = new DefaultEmbed(client)
+        .setTitle(`Role information - ${role.name}`)
+        .setThumbnail(`attachment://${fileName}`)
+        .addField('Name', role.toString(), true)
+        .addField('Color', role.hexColor, true)
+        .addField('ID', role.id, true)
+        .addField('Created At', formatDate(role.createdAt), true)
+        .addField('Mentionable', isMentionable, true)
+        .addField('Displayed Separately', isDisplayedSeparately, true);
 
-        await interaction.reply({ embeds: [embed], files: [attachment] });
-    },
+    interaction.reply({ embeds: [embed], files: [attachment] });
 };

@@ -1,4 +1,2 @@
-module.exports = {
-    primary: '#FFCC66',
-    secondary: '#00E6D2',
-};
+export const primary = '#FFCC66';
+export const secondary = '#00E6D2';

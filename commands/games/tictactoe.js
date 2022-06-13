@@ -1,6 +1,10 @@
-const { SlashCommandBuilder, bold, inlineCode, spoiler } = require('@discordjs/builders');
-const { createCanvas } = require('canvas');
-const { MessageActionRow, MessageAttachment, MessageButton } = require('discord.js');
+import { bold, inlineCode, SlashCommandBuilder, spoiler } from '@discordjs/builders';
+import nodeCanvas from 'canvas';
+import { MessageActionRow, MessageAttachment, MessageButton } from 'discord.js';
+
+import { primary, secondary } from '../../helpers/colors.js';
+import DefaultEmbed from '../../helpers/embeds.js';
+import { formatDuration, pluralize } from '../../helpers/formatter.js';
 
 const BOARD_SIZE = 3;
 const CANVAS_SIZE = 600, CANVAS_PADDING = 30;
@@ -25,19 +29,6 @@ const drawBoardLines = ctx => {
     ctx.stroke();
 };
 
-const drawO = (ctx, x, y) => {
-
-    const margin = SECTION_SIZE / 2;
-
-    const centerX = x + SECTION_SIZE / 2;
-    const centerY = y + SECTION_SIZE / 2;
-    const radius = (SECTION_SIZE - margin) / 2;
-
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.stroke();
-};
-
 const drawX = (ctx, x, y) => {
 
     const margin = SECTION_SIZE / 4 + ctx.lineWidth / 2;
@@ -53,12 +44,24 @@ const drawX = (ctx, x, y) => {
     ctx.stroke();
 };
 
+const drawO = (ctx, x, y) => {
+
+    const margin = SECTION_SIZE / 2;
+
+    const centerX = x + SECTION_SIZE / 2;
+    const centerY = y + SECTION_SIZE / 2;
+    const radius = (SECTION_SIZE - margin) / 2;
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.stroke();
+};
+
 const endGame = (interaction, boardButtons, currentPlayer, player, opponent, turnCount, winningLine) => {
 
     const { client } = interaction;
-    const { pluralize } = client.bot.formatter;
 
-    const canvas = createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+    const canvas = nodeCanvas.createCanvas(CANVAS_SIZE, CANVAS_SIZE);
     const ctx = canvas.getContext('2d');
 
     // Draw board background.
@@ -87,11 +90,11 @@ const endGame = (interaction, boardButtons, currentPlayer, player, opponent, tur
             const y = getCanvasPosition(Math.floor(index / BOARD_SIZE));
 
             if (cell.label == 'X') {
-                ctx.strokeStyle = client.bot.colors.primary;
+                ctx.strokeStyle = primary;
                 drawX(ctx, x, y);
             }
             if (cell.label == 'O') {
-                ctx.strokeStyle = client.bot.colors.secondary;
+                ctx.strokeStyle = secondary;
                 drawO(ctx, x, y);
             }
         });
@@ -104,7 +107,7 @@ const endGame = (interaction, boardButtons, currentPlayer, player, opponent, tur
         ? `${currentPlayer} won the game after a total of ${pluralize(turnCount, 'move')}!`
         : 'It was a tie!';
 
-    const embed = new client.bot.embeds.DefaultEmbed(client)
+    const embed = new DefaultEmbed(client)
         .setDescription(`${header}\n\n${description}`)
         .setImage(`attachment://${fileName}`);
 
@@ -113,6 +116,22 @@ const endGame = (interaction, boardButtons, currentPlayer, player, opponent, tur
         components: [],
         files: [attachment],
     });
+};
+
+const generateDescription = (waitingForOpponent, currentPlayer, player, opponent) => {
+
+    const header = bold(`${player} (X) vs. ${opponent ?? '???'} (O)`);
+
+    if (waitingForOpponent) {
+        return `${header}
+        
+        Waiting for someone to join the game...
+        You can join the game by using the buttons below to make a move!`;
+    }
+
+    return `${header}
+
+    It's ${currentPlayer}'s turn! Use the buttons below to make a move.`;
 };
 
 const generateBoardButtons = () => {
@@ -135,20 +154,14 @@ const generateBoardButtons = () => {
     return boardButtons;
 };
 
-const generateDescription = (waitingForOpponent, currentPlayer, player, opponent) => {
-
-    const header = bold(`${player} (X) vs. ${opponent ?? '???'} (O)`);
-
-    if (waitingForOpponent) {
-        return `${header}
-        
-        Waiting for someone to join the game...
-        You can join the game by using the buttons below to make a move!`;
-    }
-
-    return `${header}
-
-    It's ${currentPlayer}'s turn! Use the buttons below to make a move.`;
+const setReminder = (interaction, currentPlayer, prevReminders, reminderDelay) => {
+    return setTimeout(async () => {
+        const prevReminder = await interaction.followUp({
+            content: `${currentPlayer} It's your turn now!`,
+            fetchReply: true,
+        });
+        prevReminders.push(prevReminder);
+    }, reminderDelay);
 };
 
 const getWinningLine = (boardButtons, turnCount) => {
@@ -196,27 +209,15 @@ const getWinningLine = (boardButtons, turnCount) => {
     return null;
 };
 
-const setReminder = (interaction, currentPlayer, prevReminders, reminderDelay) => {
-    return setTimeout(async () => {
-        const prevReminder = await interaction.followUp({
-            content: `${currentPlayer} It's your turn now!`,
-            fetchReply: true,
-        });
-        prevReminders.push(prevReminder);
-    }, reminderDelay);
-};
-
 const startGame = async (interaction, opponent = null) => {
 
     const { client } = interaction;
-    const { formatDuration } = client.bot.formatter;
-
     const player = interaction.user;
 
     let currentPlayer = player;
     let waitingForOpponent = false;
 
-    const embed = new client.bot.embeds.DefaultEmbed(client)
+    const embed = new DefaultEmbed(client)
         .setTitle('Tic-Tac-Toe')
         .setDescription(generateDescription(waitingForOpponent, currentPlayer, player, opponent));
 
@@ -307,12 +308,10 @@ const startGame = async (interaction, opponent = null) => {
 const sendChallenge = async (interaction, opponent) => {
 
     const { client } = interaction;
-    const { formatDuration } = client.bot.formatter;
-
     const player = interaction.user;
     const collectorDuration = 300_000;
 
-    const embed = new client.bot.embeds.DefaultEmbed(client)
+    const embed = new DefaultEmbed(client)
         .setTitle('Tic-Tac-Toe')
         .setDescription(`${opponent}, ${player} challenges you to a game of Tic-Tac-Toe!`);
 
@@ -395,36 +394,33 @@ const sendChallenge = async (interaction, opponent) => {
     });
 };
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('tictactoe')
-        .setDescription('Challenge someone to a game of Tic-Tac-Toe!')
-        .addUserOption(option =>
-            option.setName('opponent')
-                .setDescription('Select someone to challenge'),
-        ),
+export const data = new SlashCommandBuilder()
+    .setName('tictactoe')
+    .setDescription('Challenge someone to a game of Tic-Tac-Toe!')
+    .addUserOption(option =>
+        option.setName('opponent')
+            .setDescription('Select someone to challenge'),
+    );
 
-    async execute(interaction) {
+export const execute = async interaction => {
 
-        const { client } = interaction;
+    const { client } = interaction;
+    const player = interaction.user;
+    const opponent = interaction.options.getUser('opponent');
 
-        const player = interaction.user;
-        const opponent = interaction.options.getUser('opponent');
+    if (!opponent) {
+        await interaction.deferReply();
+        return startGame(interaction);
+    }
 
-        if (!opponent) {
-            await interaction.deferReply();
-            return startGame(interaction);
-        }
+    if (opponent.bot && opponent.id == client.user.id)
+        return interaction.reply({ content: `Oops, I'm busy right now! In the mean time, you can play with your ${spoiler('non-existent')} friends!`, ephemeral: true });
 
-        if (opponent.bot && opponent.id == client.user.id)
-            return interaction.reply({ content: `Oops, I'm busy right now! In the mean time, you can play with your ${spoiler('non-existent')} friends!`, ephemeral: true });
+    if (opponent.bot && opponent.id != client.user.id)
+        return interaction.reply({ content: `U-uh, you can't play with a bot... ${spoiler('except me :D')}`, ephemeral: true });
 
-        if (opponent.bot && opponent.id != client.user.id)
-            return interaction.reply({ content: `U-uh, you can't play with a bot... ${spoiler('except me :D')}`, ephemeral: true });
+    if (opponent.id == player.id)
+        return interaction.reply({ content: `U-uh, you can play ${inlineCode('/tictactoe')} without specifying someone if you don't have any friends, you know?`, ephemeral: true });
 
-        if (opponent.id == player.id)
-            return interaction.reply({ content: `U-uh, you can play ${inlineCode('/tictactoe')} without specifying someone if you don't have any friends, you know?`, ephemeral: true });
-
-        sendChallenge(interaction, opponent);
-    },
+    sendChallenge(interaction, opponent);
 };

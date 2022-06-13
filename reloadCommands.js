@@ -1,19 +1,18 @@
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+import { config } from 'dotenv';
 
-const logger = require('./helpers/logger');
-const requireFiles = require('./helpers/requireFiles');
+import loadModules from './helpers/loadModules.js';
+import { logError, logReady } from './helpers/logger.js';
 
-const dotenv = require('dotenv');
-
-dotenv.config();
+config();
 const { CLIENT_ID, DISCORD_TOKEN, GUILD_ID } = process.env;
 const rest = new REST({ version: '9' }).setToken(DISCORD_TOKEN);
 
 const commands = [];
 
 (async () => {
-    await requireFiles('commands', command => {
+    await loadModules('commands', command => {
         commands.push(command.data.toJSON());
     });
 
@@ -23,8 +22,8 @@ const commands = [];
             { body: commands },
         );
 
-        logger.logReady(`Reloaded ${commands.length} commands`);
+        logReady(`Reloaded ${commands.length} commands`);
     } catch (error) {
-        logger.logError(error);
+        logError(error);
     }
 })();

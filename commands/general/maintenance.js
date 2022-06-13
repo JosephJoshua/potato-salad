@@ -1,19 +1,19 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton } = require('discord.js');
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { MessageActionRow, MessageButton } from 'discord.js';
 
-const startMaintenance = async (client, interaction) => {
+import DefaultEmbed from '../../helpers/embeds.js';
+
+const startMaintenance = (client, interaction) => {
+
     client.bot.maintenance = true;
 
-    const embed = new client.bot.embeds.DefaultEmbed(client)
-        .setTitle('Bot maintenance')
+    const embed = new DefaultEmbed(client)
+        .setTitle('Maintenance break')
         .setDescription(`
-            I'm now in maintenance mode! 
+            I'm now in maintenance mode!
             や、優しくしてね！`);
 
-    await interaction.update({
-        embeds: [embed],
-        components: [],
-    });
+    interaction.update({ embeds: [embed], components: [] });
 };
 
 const sendConfirmationMessage = async interaction => {
@@ -21,10 +21,10 @@ const sendConfirmationMessage = async interaction => {
     const { client } = interaction;
     const collectorDuration = 60_000;
 
-    const embed = new client.bot.embeds.DefaultEmbed(client)
-        .setTitle('Bot maintenance')
+    const embed = new DefaultEmbed(client)
+        .setTitle('Maintenance break')
         .setDescription(`
-            Are you sure you want to start a maintenance?
+            Are you sure you want to start a maintenance break?
             This will disable the use of commands for all guilds I'm in!`);
 
     const actionRow = new MessageActionRow().setComponents([
@@ -48,12 +48,13 @@ const sendConfirmationMessage = async interaction => {
     collector.on('collect', i => {
 
         if (i.user.id != interaction.user.id) {
-            // 駄作のままであり続ける
-            return i.reply({ embeds: [
-                new client.bot.embeds.DefaultEmbed(client)
-                    .setTitle('Bot maintenance')
-                    .setDescription('Who are you?! A-an enemy?!'),
-            ], ephemeral: true });
+            return i.reply({
+                embeds: [
+                    new client.bot.embeds.DefaultEmbed(client)
+                        .setTitle('Maintenance break')
+                        .setDescription('Who are you?! A-an enemy?!'),
+                ], ephemeral: true,
+            });
         }
 
         finalButtonInteraction = i;
@@ -62,29 +63,28 @@ const sendConfirmationMessage = async interaction => {
 
     collector.on('end', (_, reason) => {
         if (reason == 'yes') return startMaintenance(client, finalButtonInteraction);
-        else if (reason == 'time') return interaction.deleteReply();
-
-        finalButtonInteraction.deferUpdate(); // Prevent interaction failed error.
+        if (reason == 'no') finalButtonInteraction.deferUpdate(); // Prevent interaction failed error.
         interaction.deleteReply();
     });
 };
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('maintenance')
-        .setDescription('Signals to the bot that a maintenance is happening'),
+export const data = new SlashCommandBuilder()
+    .setName('maintenance')
+    .setDescription('Starts a maintenance break');
 
-    async execute(interaction) {
-        const { client } = interaction;
+export const execute = interaction => {
 
-        if (!client.bot.authors.includes(interaction.user.id)) {
-            return interaction.reply({ embeds: [
+    const { client } = interaction;
+
+    if (!client.bot.authors.includes(interaction.user.id)) {
+        return interaction.reply({
+            embeds: [
                 new client.bot.embeds.DefaultEmbed(client)
-                    .setTitle('Bot maintenance')
+                    .setTitle('Maintenance break')
                     .setDescription('Only my creators can do maintenance on me!'),
-            ], ephemeral: true });
-        }
+            ], ephemeral: true,
+        });
+    }
 
-        sendConfirmationMessage(interaction);
-    },
+    sendConfirmationMessage(interaction);
 };
