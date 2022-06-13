@@ -46,13 +46,26 @@ const sendConfirmationMessage = async interaction => {
     let finalButtonInteraction = null;
 
     collector.on('collect', i => {
+
+        if (i.user.id != interaction.user.id) {
+            // 駄作のままであり続ける
+            return i.reply({ embeds: [
+                new client.bot.embeds.DefaultEmbed(client)
+                    .setTitle('Bot maintenance')
+                    .setDescription('Who are you?! A-an enemy?!'),
+            ], ephemeral: true });
+        }
+
         finalButtonInteraction = i;
         collector.stop(i.customId);
     });
 
     collector.on('end', (_, reason) => {
-        if (reason == 'yes') startMaintenance(client, finalButtonInteraction);
-        else interaction.deleteReply();
+        if (reason == 'yes') return startMaintenance(client, finalButtonInteraction);
+        else if (reason == 'time') return interaction.deleteReply();
+
+        finalButtonInteraction.deferUpdate(); // Prevent interaction failed error.
+        interaction.deleteReply();
     });
 };
 
@@ -62,8 +75,15 @@ module.exports = {
         .setDescription('Signals to the bot that a maintenance is happening'),
 
     async execute(interaction) {
-        if (!interaction.client.bot.authors.includes(interaction.user.id))
-            return interaction.reply({ content: 'Only my creators can do maintenance on me!', ephemeral: true });
+        const { client } = interaction;
+
+        if (!client.bot.authors.includes(interaction.user.id)) {
+            return interaction.reply({ embeds: [
+                new client.bot.embeds.DefaultEmbed(client)
+                    .setTitle('Bot maintenance')
+                    .setDescription('Only my creators can do maintenance on me!'),
+            ], ephemeral: true });
+        }
 
         sendConfirmationMessage(interaction);
     },
