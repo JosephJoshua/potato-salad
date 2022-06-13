@@ -6,8 +6,14 @@ module.exports = {
             const command = client.bot.commands.get(interaction.commandName);
 
             if (!command) return;
-            if (client.bot.maintenance)
-                return await interaction.reply('I\'m currently under maintenance! I know you\'ll miss me a lot so I\'ll try my best to come back as quick as possible!');
+            if (client.bot.maintenance) {
+                return await interaction.reply({ embeds: [
+                    new client.bot.embeds.DefaultEmbed(client)
+                        .setTitle('Bot maintenance')
+                        .setDescription('I\'m currently under maintenance! I know you\'ll miss me a lot so I\'ll try my best to come back as soon as possible!')
+                        .showBotThumbnail(),
+                ] });
+            }
 
             try {
                 const runtime = await client.bot.time(async () => await command.execute(interaction));
