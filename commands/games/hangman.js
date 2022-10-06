@@ -134,7 +134,7 @@ const startGame = async (interaction) => {
     const collectorDuration = 300_000;
 
     const word = randomFromArray(WORDS).trimEnd().split('');
-    const guess = word.map(() => '_');
+    const guess = word.map((c) => c === '-' ? c : '_'); // Reveal all dashes beforehand.
 
     const canvas = nodeCanvas.createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     const ctx = canvas.getContext('2d');

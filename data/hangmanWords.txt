@@ -806,6 +806,7 @@ degree
 fortune
 hit
 invitation
+k-drama
 search
 weather
 alarm
