@@ -1,4 +1,4 @@
-import { bold, inlineCode, SlashCommandBuilder, SlashCommandSubcommandBuilder } from '@discordjs/builders';
+import { bold, inlineCode, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import paginatedEmbed from '../../helpers/pagination.js';
@@ -78,8 +78,10 @@ const generateCommandHelpEmbed = (client, command) => {
     return new DefaultEmbed(client)
         .setTitle('Command help')
         .setBotThumbnail()
-        .addField(`/${command.data.name}`, command.data.description)
-        .addField('Usage', usageStr);
+        .addFields([
+            { name: `/${command.data.name}`, value: command.data.description },
+            { name: 'Usage', value: usageStr },
+        ]);
 };
 
 const generateCommandPageEmbed = (client, category = '') => {
@@ -107,7 +109,7 @@ const generateCommandPages = (client, commands, category = '') => {
             pages[pageIndex] = generateCommandPageEmbed(client, category);
 
         // Add the command as a field in the embed.
-        pages[pageIndex].addField(fieldName, fieldValue);
+        pages[pageIndex].addFields({ name: fieldName, value: fieldValue });
 
         // If we're past the max commands per page, move to the next page.
         if (pages[pageIndex].fields.length >= COMMANDS_PER_PAGE)

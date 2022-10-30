@@ -1,3 +1,8 @@
+export const pluralize = (count, word, suffix = 's') => {
+    if (count === 1) return `${count} ${word}`;
+    return `${count} ${word}${suffix}`;
+};
+
 export const formatDate = date => {
 
     const monthStrings = [
@@ -53,9 +58,4 @@ export const formatMemory = memory => {
     const value = Number((memory / oneOfUnit).toFixed(2));
 
     return `${value} ${units[unitIndex]}`;
-};
-
-export const pluralize = (count, word, suffix = 's') => {
-    if (count === 1) return `${count} ${word}`;
-    return `${count} ${word}${suffix}`;
 };

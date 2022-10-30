@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import { formatDate } from '../../helpers/formatter.js';
@@ -40,13 +40,15 @@ export const execute = interaction => {
     const embed = new DefaultEmbed(client)
         .setTitle(`User information - ${member.displayName}`)
         .setThumbnail(member.displayAvatarURL())
-        .addField('Username', member.user.tag, true)
-        .addField('Joined Server', formatDate(member.joinedAt), true)
-        .addField('ID', member.id, true)
-        .addField('Created At', formatDate(member.user.createdAt), true)
-        .addField('Boosting Since', boostingSince, true)
-        .addField('In Voice', isInVoice, true)
-        .addField(`Roles (${roleCount})`, roleNames.join(' '));
+        .addFields([
+            { name: 'Username', value: member.user.tag, inline: true },
+            { name: 'Joined Server', value: formatDate(member.joinedAt), inline: true },
+            { name: 'ID', value: member.id, inline: true },
+            { name: 'Created At', value: formatDate(member.user.createdAt), inline: true },
+            { name: 'Boosting Since', value: boostingSince, inline: true },
+            { name: 'In Voice', value: isInVoice, inline: true },
+            { name: `Roles (${roleCount})`, value: roleNames.join(' '), inline: true },
+        ]);
 
     interaction.reply({ embeds: [embed] });
 };

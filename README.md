@@ -1,3 +1,3 @@
-# Potato Salad!
+# Potato Salad
 
-Potatoes and salads!
+A Discord Bot featuring potatoes and salads

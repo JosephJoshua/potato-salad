@@ -1,0 +1,9 @@
+authors = ["", ""]
+version = ""
+
+id = ""
+token = ""
+
+[[guilds]]
+id = ""
+modules = [""]

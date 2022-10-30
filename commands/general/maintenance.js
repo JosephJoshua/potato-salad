@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { MessageActionRow, MessageButton } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ComponentType, SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 
@@ -27,9 +26,9 @@ const sendConfirmationMessage = async interaction => {
             Are you sure you want to start a maintenance break?
             This will disable the use of commands for all guilds I'm in!`);
 
-    const actionRow = new MessageActionRow().setComponents([
-        new MessageButton().setCustomId('yes').setLabel('Yes').setStyle('SUCCESS'),
-        new MessageButton().setCustomId('no').setLabel('No').setStyle('DANGER'),
+    const actionRow = new ActionRowBuilder().setComponents([
+        new ButtonBuilder().setCustomId('yes').setLabel('Yes').setStyle('Success'),
+        new ButtonBuilder().setCustomId('no').setLabel('No').setStyle('Danger'),
     ]);
 
     const message = await interaction.reply({
@@ -39,7 +38,7 @@ const sendConfirmationMessage = async interaction => {
     });
 
     const collector = await message.createMessageComponentCollector({
-        componentType: 'BUTTON',
+        componentType: ComponentType.Button,
         time: collectorDuration,
     });
 

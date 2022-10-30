@@ -1,14 +1,39 @@
 {
-	"extends": "eslint:recommended",
 	"env": {
-		"node": true,
-		"es2022": true
+		"es2022": true,
+		"node": true
 	},
+	"extends": "eslint:recommended",
 	"parserOptions": {
 		"ecmaVersion": 2022,
 		"sourceType": "module"
 	},
 	"rules": {
+		// ESLint possible problems: https://eslint.org/docs/latest/rules/#possible-problems
+		"array-callback-return": [
+			"warn",
+			{
+				"checkForEach": true
+			}
+		],
+		"no-await-in-loop": "warn",
+		"no-constant-binary-expression": "warn",
+		"no-constructor-return": "warn",
+		"no-duplicate-imports": [
+			"warn",
+			{
+				"includeExports": true
+			}
+		],
+		"no-promise-executor-return": "warn",
+		"no-self-compare": "warn",
+		"no-template-curly-in-string": "warn",
+		"no-unmodified-loop-condition": "warn",
+		"no-unreachable-loop": "warn",
+		"no-unused-private-class-members": "warn",
+		"no-use-before-define": "warn",
+
+		// https://discordjs.guide/preparations/setting-up-a-linter.html#setting-up-eslint-rules
 		"arrow-spacing": ["warn", { "before": true, "after": true }],
 		"brace-style": ["error", "1tbs", { "allowSingleLine": true }],
 		"comma-dangle": ["error", "always-multiline"],

@@ -1,8 +1,6 @@
-import { readFileSync } from 'node:fs';
-
-import { SlashCommandBuilder } from '@discordjs/builders';
 import nodeCanvas from 'canvas';
-import { MessageActionRow, MessageAttachment, MessageButton, Util } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ComponentType, escapeItalic, SlashCommandBuilder } from 'discord.js';
+import { readFileSync } from 'node:fs';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import { formatDuration } from '../../helpers/formatter.js';
@@ -104,12 +102,12 @@ const generateAlphabetBtns = (exclude) => {
     for (let i = 0; i < alphabet.length; i += ACTION_ROW_LIMIT) {
         const slice = alphabet.slice(i, i + ACTION_ROW_LIMIT);
 
-        actionRows[i / ACTION_ROW_LIMIT] = new MessageActionRow()
+        actionRows[i / ACTION_ROW_LIMIT] = new ActionRowBuilder()
             .setComponents(
-                slice.map(char => new MessageButton()
+                slice.map(char => new ButtonBuilder()
                     .setCustomId(char)
                     .setLabel(char.toUpperCase())
-                    .setStyle('SECONDARY')));
+                    .setStyle('Secondary')));
     }
 
     return actionRows;
@@ -120,7 +118,7 @@ const generateAttachmentName = failedAttempts => `hangman-${failedAttempts}.png`
 const generateHangmanEmbed = (client, guess, failedAttempts) => {
     return new DefaultEmbed(client)
         .setTitle('Hangman')
-        .addField(Util.escapeItalic(guess.join(' ')), '\u200b')
+        .addFields({ name: escapeItalic(guess.join(' ')), value: '\u200b' })
         .setImage(`attachment://${generateAttachmentName(failedAttempts)}`);
 };
 
@@ -145,7 +143,7 @@ const startGame = async (interaction) => {
 
     drawPole(ctx);
 
-    let attachment = new MessageAttachment(canvas.toBuffer(), generateAttachmentName(0));
+    let attachment = new AttachmentBuilder(canvas.toBuffer(), generateAttachmentName(0));
 
     const wordLower = word.join('').toLowerCase();
     const filteredAlphabet = ALPHABET.filter(c => !wordLower.includes(c));
@@ -154,7 +152,7 @@ const startGame = async (interaction) => {
     const embed = generateHangmanEmbed(client, guess, 0);
 
     const collector = (await interaction.fetchReply()).createMessageComponentCollector({
-        componentType: 'BUTTON',
+        componentType: ComponentType.Button,
         time: collectorDuration,
     });
 
@@ -176,10 +174,11 @@ const startGame = async (interaction) => {
 
         const correct = word.some(c => c.toLowerCase() === i.customId);
 
-        actionRows.forEach(row =>
+        actionRows.forEach(row => {
             row.components.find(btn => btn.customId === i.customId)
                 ?.setDisabled(true)
-                ?.setStyle(correct ? 'PRIMARY' : 'DANGER'));
+                ?.setStyle(correct ? 'Primary' : 'Danger');
+        });
 
         finalButtonInteraction = i;
         collector.resetTimer();
@@ -199,7 +198,7 @@ const startGame = async (interaction) => {
         }
 
         drawFunctions[failedAttempts++](ctx);
-        attachment = new MessageAttachment(canvas.toBuffer(), generateAttachmentName(failedAttempts));
+        attachment = new AttachmentBuilder(canvas.toBuffer(), generateAttachmentName(failedAttempts));
 
         if (failedAttempts === drawFunctions.length) return collector.stop('lose');
 
@@ -212,7 +211,11 @@ const startGame = async (interaction) => {
 
     collector.on('end', async (_, reason) => {
 
-        actionRows.forEach(row => row.components.forEach(button => button.setDisabled(true)));
+        actionRows.forEach(row => {
+            row.components.forEach(button => {
+                button.setDisabled(true);
+            });
+        });
 
         if (reason === 'time') {
 

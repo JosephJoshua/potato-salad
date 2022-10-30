@@ -1,6 +1,5 @@
-import { bold, inlineCode, SlashCommandBuilder, spoiler } from '@discordjs/builders';
 import nodeCanvas from 'canvas';
-import { MessageActionRow, MessageAttachment, MessageButton } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, bold, ButtonBuilder, ComponentType, inlineCode, SlashCommandBuilder, spoiler } from 'discord.js';
 
 import { primary, secondary } from '../../helpers/colors.js';
 import DefaultEmbed from '../../helpers/embeds.js';
@@ -100,7 +99,7 @@ const endGame = (interaction, boardButtons, currentPlayer, player, opponent, tur
         });
 
     const fileName = 'result.png';
-    const attachment = new MessageAttachment(canvas.toBuffer(), fileName);
+    const attachment = new AttachmentBuilder(canvas.toBuffer(), fileName);
 
     const header = bold(`${player} (X) vs. ${opponent} (O)`);
     const description = winningLine.length
@@ -139,13 +138,13 @@ const generateBoardButtons = () => {
     const boardButtons = [];
 
     for (let i = 0; i < BOARD_SIZE; i++) {
-        const messageActionRow = new MessageActionRow();
+        const messageActionRow = new ActionRowBuilder();
         for (let j = 0; j < BOARD_SIZE; j++) {
             messageActionRow.addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId((i * BOARD_SIZE + j).toString())
                     .setLabel('\u200b')
-                    .setStyle('SECONDARY'),
+                    .setStyle('Secondary'),
             );
         }
         boardButtons.push(messageActionRow);
@@ -233,7 +232,7 @@ const startGame = async (interaction, opponent = null) => {
     const reminderDelay = 15_000;
 
     const collector = await message.createMessageComponentCollector({
-        componentType: 'BUTTON',
+        componentType: ComponentType.Button,
         time: moveDuration,
     });
 
@@ -259,12 +258,14 @@ const startGame = async (interaction, opponent = null) => {
         if (!opponent) waitingForOpponent = true;
 
         clearTimeout(reminderTimeout);
-        prevReminders.forEach(reminder => reminder.delete());
+        prevReminders.forEach(reminder => {
+            reminder.delete();
+        });
         prevReminders = [];
 
         boardButtons.flatMap(row => row.components)[+i.customId]
             .setLabel(turnCount % 2 ? 'X' : 'O')
-            .setStyle(turnCount % 2 ? 'DANGER' : 'PRIMARY')
+            .setStyle(turnCount % 2 ? 'Danger' : 'Primary')
             .setDisabled(true);
 
         winningLine = getWinningLine(boardButtons, turnCount);
@@ -291,15 +292,17 @@ const startGame = async (interaction, opponent = null) => {
         if (reason == 'time') {
 
             boardButtons.flatMap(row => row.components)
-                .forEach(button => button.setDisabled(true));
+                .forEach(button => {
+                    button.setDisabled(true);
+                });
 
-            const infoButton = new MessageButton()
+            const infoButton = new ButtonBuilder()
                 .setCustomId('info')
                 .setLabel(`Expired after ${formatDuration(moveDuration)}`)
-                .setStyle('SECONDARY')
+                .setStyle('Secondary')
                 .setDisabled(true);
 
-            boardButtons.push(new MessageActionRow().addComponents(infoButton));
+            boardButtons.push(new ActionRowBuilder().addComponents(infoButton));
             message.edit({ components: boardButtons });
         }
     });
@@ -315,27 +318,27 @@ const sendChallenge = async (interaction, opponent) => {
         .setTitle('Tic-Tac-Toe')
         .setDescription(`${opponent}, ${player} challenges you to a game of Tic-Tac-Toe!`);
 
-    const infoButton = new MessageButton()
+    const infoButton = new ButtonBuilder()
         .setCustomId('info')
         .setLabel(`Expires in ${formatDuration(collectorDuration)}`)
-        .setStyle('SECONDARY')
+        .setStyle('Secondary')
         .setDisabled(true);
 
     const buttons = [
-        new MessageButton()
+        new ButtonBuilder()
             .setCustomId('accept')
             .setLabel('Accept')
-            .setStyle('SUCCESS'),
+            .setStyle('Success'),
 
-        new MessageButton()
+        new ButtonBuilder()
             .setCustomId('decline')
             .setLabel('Decline')
-            .setStyle('DANGER'),
+            .setStyle('Danger'),
 
         infoButton,
     ];
 
-    const actionRow = new MessageActionRow().addComponents(buttons);
+    const actionRow = new ActionRowBuilder().addComponents(buttons);
 
     const message = await interaction.reply({
         embeds: [embed],
@@ -352,7 +355,7 @@ const sendChallenge = async (interaction, opponent) => {
     });
 
     const collector = await message.createMessageComponentCollector({
-        componentType: 'BUTTON',
+        componentType: ComponentType.Button,
         time: collectorDuration,
     });
 
@@ -378,7 +381,9 @@ const sendChallenge = async (interaction, opponent) => {
             startGame(interaction, opponent);
         }
 
-        buttons.forEach(button => button.setDisabled(true));
+        buttons.forEach(button => {
+            button.setDisabled(true);
+        });
 
         if (reason == 'decline') {
             infoButton.setLabel('Challenge was declined');

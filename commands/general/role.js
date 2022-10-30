@@ -1,6 +1,5 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { Resvg } from '@resvg/resvg-js';
-import { MessageAttachment } from 'discord.js';
+import { AttachmentBuilder, SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import { formatDate } from '../../helpers/formatter.js';
@@ -35,17 +34,19 @@ export const execute = interaction => {
     const pngBuffer = new Resvg(svgStr).render().asPng();
 
     const fileName = `${role.id}.png`;
-    const attachment = new MessageAttachment(pngBuffer, fileName);
+    const attachment = new AttachmentBuilder(pngBuffer, fileName);
 
     const embed = new DefaultEmbed(client)
         .setTitle(`Role information - ${role.name}`)
         .setThumbnail(`attachment://${fileName}`)
-        .addField('Name', role.toString(), true)
-        .addField('Color', role.hexColor, true)
-        .addField('ID', role.id, true)
-        .addField('Created At', formatDate(role.createdAt), true)
-        .addField('Mentionable', isMentionable, true)
-        .addField('Displayed Separately', isDisplayedSeparately, true);
+        .addFields([
+            { name: 'Name', value: role.toString(), inline: true },
+            { name: 'Color', value: role.hexColor, inline: true },
+            { name: 'ID', value: role.id, inline: true },
+            { name: 'Created At', value: formatDate(role.createdAt), inline: true },
+            { name: 'Mentionable', value: isMentionable, inline: true },
+            { name: 'Displayed Separately', value: isDisplayedSeparately, inline: true },
+        ]);
 
     interaction.reply({ embeds: [embed], files: [attachment] });
 };

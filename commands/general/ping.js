@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 
@@ -16,8 +16,10 @@ export const execute = async interaction => {
     const replyEmbed = new DefaultEmbed(client)
         .setTitle('Pong!')
         .setBotThumbnail()
-        .addField('API', `${client.ws.ping}ms`)
-        .addField('Latency', `${reply.createdTimestamp - interaction.createdTimestamp}ms`);
+        .addFields([
+            { name: 'API', value: `${client.ws.ping}ms` },
+            { name: 'Latency', value: `${reply.createdTimestamp - interaction.createdTimestamp}ms` },
+        ]);
 
     interaction.editReply({ embeds: [replyEmbed] });
 };

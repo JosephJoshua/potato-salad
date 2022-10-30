@@ -1,13 +1,12 @@
-import { Client, Collection, Intents, version } from 'discord.js';
-import { config } from 'dotenv';
+import { parse } from '@ltd/j-toml';
+import { Client, Collection, GatewayIntentBits, version as djsVersion } from 'discord.js';
+import { readFileSync } from 'node:fs';
 
-import { logError, logWarn } from './helpers/logger.js';
 import loadModules from './helpers/loadModules.js';
+import { logError, logWarn } from './helpers/logger.js';
 
-config();
-const { DISCORD_TOKEN, npm_package_version } = process.env;
-
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+client.bot = parse(readFileSync('./config.toml'));
 
 const loadCommands = () => {
 
@@ -39,22 +38,19 @@ const loadEvents = () => {
     });
 };
 
-client.bot = {};
+const loadVersion = () => {
 
-loadEvents();
+    client.bot.libraryVersion = djsVersion;
+
+    if (!client.bot.version) {
+        client.bot.version = '1.0.1';
+        logWarn('Missing bot version, set the version in config.toml');
+        logWarn(`Using v${client.bot.version} as fallback`);
+    }
+};
+
 loadCommands();
+loadEvents();
+loadVersion();
 
-client.bot.authors = [
-    '694499855174992032',
-    '217518123606081536',
-];
-
-client.bot.libraryVersion = version;
-
-client.bot.version = npm_package_version ?? '1.0.0';
-if (!npm_package_version) {
-    logWarn('Missing bot version, start with `npm start` instead');
-    logWarn(`Using v${client.bot.version} as fallback`);
-}
-
-client.login(DISCORD_TOKEN);
+client.login(client.bot.token);

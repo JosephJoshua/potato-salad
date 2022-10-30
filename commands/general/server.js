@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import { formatDate, pluralize } from '../../helpers/formatter.js';
@@ -27,12 +27,14 @@ export const execute = async interaction => {
     const embed = new DefaultEmbed(client)
         .setTitle(`Server information - ${guild.name}`)
         .setThumbnail(guild.iconURL())
-        .addField('Owner', owner.user.toString(), true)
-        .addField('Members', pluralize(guild.memberCount, 'member'), true)
-        .addField('ID', guild.id, true)
-        .addField('Created At', formatDate(guild.createdAt), true)
-        .addField('Boosts', `${guild.premiumSubscriptionCount} (${BOOST_TIERS[guild.premiumTier]})`, true)
-        .addField('Channels', `${pluralize(textCount, 'text channel')}\n${pluralize(voiceCount, 'voice channel')}`, true);
+        .addFields([
+            { name: 'Owner', value: owner.user.toString(), inline: true },
+            { name: 'Members', value: pluralize(guild.memberCount, 'member'), inline: true },
+            { name: 'ID', value: guild.id, inline: true },
+            { name: 'Created At', value: formatDate(guild.createdAt), inline: true },
+            { name: 'Boosts', value: `${guild.premiumSubscriptionCount} (${BOOST_TIERS[guild.premiumTier]},`, inline: true },
+            { name: 'Channels', value: `${pluralize(textCount, 'text channel')}\n${pluralize(voiceCount, 'voice channel')}`, inline: true },
+        ]);
 
     interaction.reply({ embeds: [embed] });
 };

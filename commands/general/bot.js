@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder } from 'discord.js';
 
 import DefaultEmbed from '../../helpers/embeds.js';
 import { formatDuration, formatMemory, pluralize } from '../../helpers/formatter.js';
@@ -19,15 +19,17 @@ export const execute = async interaction => {
     const embed = new DefaultEmbed(client)
         .setTitle(`Bot information - ${client.user.username}`)
         .setBotThumbnail()
-        .addField('Authors', authors.join('\n'), true)
-        .addField('Bot Version', `v${client.bot.version}`, true)
-        .addField('Bot ID', client.user.id, true)
-        .addField('Library', 'discord.js', true)
-        .addField('Library Version', client.bot.libraryVersion, true)
-        .addField('Memory', `${formatMemory(heapUsed)}/${formatMemory(heapTotal)}`, true)
-        .addField('Ping', `${client.ws.ping}ms`, true)
-        .addField('Uptime', formatDuration(client.uptime), true)
-        .addField('Servers', pluralize(client.guilds.cache.size, 'server'), true);
+        .addFields([
+            { name: 'Authors', value: authors.join('\n'), inline: true },
+            { name: 'Bot Version', value: `v${client.bot.version}`, inline: true },
+            { name: 'Bot ID', value: client.user.id, inline: true },
+            { name: 'Library', value: 'discord.js', inline: true },
+            { name: 'Library Version', value: client.bot.libraryVersion, inline: true },
+            { name: 'Memory', value: `${formatMemory(heapUsed)}/${formatMemory(heapTotal)}`, inline: true },
+            { name: 'Ping', value: `${client.ws.ping}ms`, inline: true },
+            { name: 'Uptime', value: formatDuration(client.uptime), inline: true },
+            { name: 'Servers', value: pluralize(client.guilds.cache.size, 'server'), inline: true },
+        ]);
 
     interaction.reply({ embeds: [embed] });
 };

@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageButton } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ComponentType } from 'discord.js';
 
 import { log, logError } from '../helpers/logger.js';
 
@@ -29,24 +29,24 @@ export default async (interaction, pages, timeout = 120_000) => {
         return page;
     }
 
-    const prevBtn = new MessageButton()
+    const prevBtn = new ButtonBuilder()
         .setCustomId(prevButtonId)
         .setLabel('<')
-        .setStyle('SECONDARY')
+        .setStyle('Secondary')
         .setDisabled(true);
 
-    const nextBtn = new MessageButton()
+    const nextBtn = new ButtonBuilder()
         .setCustomId(nextButtonId)
         .setLabel('>')
-        .setStyle('SECONDARY');
+        .setStyle('Secondary');
 
-    const infoBtn = new MessageButton()
+    const infoBtn = new ButtonBuilder()
         .setCustomId(infoButtonId)
         .setLabel(`Requested by ${interaction.user.tag}`)
-        .setStyle('SECONDARY')
+        .setStyle('Secondary')
         .setDisabled(true);
 
-    const buttonRow = new MessageActionRow().addComponents(prevBtn, nextBtn, infoBtn);
+    const buttonRow = new ActionRowBuilder().addComponents(prevBtn, nextBtn, infoBtn);
     let currentPageIndex = 0;
 
     const getFooter = () => {
@@ -65,7 +65,7 @@ export default async (interaction, pages, timeout = 120_000) => {
 
     log(`Created paginated embed with ${pages.length} pages`);
 
-    const collector = await currentPage.createMessageComponentCollector({ componentType: 'BUTTON', time: timeout });
+    const collector = await currentPage.createMessageComponentCollector({ componentType: ComponentType.Button, time: timeout });
 
     collector.on('collect', async i => {
         switch (i.customId) {

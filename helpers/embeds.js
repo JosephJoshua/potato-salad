@@ -1,8 +1,8 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import { primary } from './colors.js';
 
-export default class DefaultEmbed extends MessageEmbed {
+export default class DefaultEmbed extends EmbedBuilder {
 
     constructor(client, setDefaultFooter = true) {
 
