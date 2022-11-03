@@ -8,7 +8,7 @@ import { logError, logReady } from './helpers/logger.js';
 
 const commands = [];
 const bot = parse(readFileSync('./config.toml'));
-const rest = new REST({ version: '10' }).setToken(bot.token);
+const rest = new REST({ version: '10' }).setToken(bot.application.token);
 
 (async () => {
     await loadModules('commands', command => {
@@ -18,7 +18,7 @@ const rest = new REST({ version: '10' }).setToken(bot.token);
     try {
         await Promise.all(bot.guilds.map(guild => {
             return rest.put(
-                Routes.applicationGuildCommands(bot.id, guild.id),
+                Routes.applicationGuildCommands(bot.application.id, guild.id),
                 { body: commands },
             );
         }));

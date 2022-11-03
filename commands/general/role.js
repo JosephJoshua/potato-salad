@@ -34,7 +34,7 @@ export const execute = interaction => {
     const pngBuffer = new Resvg(svgStr).render().asPng();
 
     const fileName = `${role.id}.png`;
-    const attachment = new AttachmentBuilder(pngBuffer, fileName);
+    const attachment = new AttachmentBuilder(pngBuffer, { name: fileName });
 
     const embed = new DefaultEmbed(client)
         .setTitle(`Role information - ${role.name}`)

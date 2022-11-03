@@ -19,7 +19,7 @@ export default async (interaction, pages, timeout = 120_000) => {
 
 
     // There's no need to show all the pagination stuff if there's only one page.
-    if (pages.length === 1) {
+    if (pages.length <= 1) {
         const page = await interaction.editReply({
             embeds: pages,
             components: [],

@@ -143,7 +143,7 @@ const startGame = async (interaction) => {
 
     drawPole(ctx);
 
-    let attachment = new AttachmentBuilder(canvas.toBuffer(), generateAttachmentName(0));
+    let attachment = new AttachmentBuilder(canvas.toBuffer(), { name: generateAttachmentName(0) });
 
     const wordLower = word.join('').toLowerCase();
     const filteredAlphabet = ALPHABET.filter(c => !wordLower.includes(c));
@@ -175,7 +175,7 @@ const startGame = async (interaction) => {
         const correct = word.some(c => c.toLowerCase() === i.customId);
 
         actionRows.forEach(row => {
-            row.components.find(btn => btn.customId === i.customId)
+            row.components.find(btn => btn.data.custom_id === i.customId)
                 ?.setDisabled(true)
                 ?.setStyle(correct ? 'Primary' : 'Danger');
         });
@@ -198,7 +198,7 @@ const startGame = async (interaction) => {
         }
 
         drawFunctions[failedAttempts++](ctx);
-        attachment = new AttachmentBuilder(canvas.toBuffer(), generateAttachmentName(failedAttempts));
+        attachment = new AttachmentBuilder(canvas.toBuffer(), { name: generateAttachmentName(failedAttempts) });
 
         if (failedAttempts === drawFunctions.length) return collector.stop('lose');
 

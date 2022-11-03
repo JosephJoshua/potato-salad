@@ -53,4 +53,4 @@ loadCommands();
 loadEvents();
 loadVersion();
 
-client.login(client.bot.token);
+client.login(client.bot.application.token);

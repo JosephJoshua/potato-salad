@@ -88,18 +88,18 @@ const endGame = (interaction, boardButtons, currentPlayer, player, opponent, tur
             const x = getCanvasPosition(index % BOARD_SIZE);
             const y = getCanvasPosition(Math.floor(index / BOARD_SIZE));
 
-            if (cell.label == 'X') {
+            if (cell.data.label == 'X') {
                 ctx.strokeStyle = primary;
                 drawX(ctx, x, y);
             }
-            if (cell.label == 'O') {
+            if (cell.data.label == 'O') {
                 ctx.strokeStyle = secondary;
                 drawO(ctx, x, y);
             }
         });
 
     const fileName = 'result.png';
-    const attachment = new AttachmentBuilder(canvas.toBuffer(), fileName);
+    const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: fileName });
 
     const header = bold(`${player} (X) vs. ${opponent} (O)`);
     const description = winningLine.length
@@ -138,16 +138,16 @@ const generateBoardButtons = () => {
     const boardButtons = [];
 
     for (let i = 0; i < BOARD_SIZE; i++) {
-        const messageActionRow = new ActionRowBuilder();
+        const actionRow = new ActionRowBuilder();
         for (let j = 0; j < BOARD_SIZE; j++) {
-            messageActionRow.addComponents(
+            actionRow.addComponents(
                 new ButtonBuilder()
                     .setCustomId((i * BOARD_SIZE + j).toString())
                     .setLabel('\u200b')
                     .setStyle('Secondary'),
             );
         }
-        boardButtons.push(messageActionRow);
+        boardButtons.push(actionRow);
     }
 
     return boardButtons;
@@ -168,7 +168,7 @@ const getWinningLine = (boardButtons, turnCount) => {
     if (turnCount < 2 * BOARD_SIZE - 1) return null;
 
     const board = boardButtons.map(row => row.components.map(button => {
-        switch (button.label) {
+        switch (button.data.label) {
             case 'X':
                 return -1;
             case 'O':

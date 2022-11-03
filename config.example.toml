@@ -1,6 +1,7 @@
-authors = ["", ""]
-version = ""
+authors = ["694499855174992032", "217518123606081536"]
+version = "1.0.1"
 
+[application]
 id = ""
 token = ""
 

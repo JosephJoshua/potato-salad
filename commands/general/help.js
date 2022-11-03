@@ -60,10 +60,18 @@ const getAllCmdsWithSubcmds = client => {
     return allCmdsWithSubcmds;
 };
 
+const generateUnknownCategoryEmbed = (client, category, validCategories) => {
+    return new DefaultEmbed(client)
+        .setTitle('Category help')
+        .setDescription(`There's no category called ${inlineCode(category)}!
+            Valid categories are ${validCategories.map(c => inlineCode(c)).join(', ')}`)
+        .setBotThumbnail();
+};
+
 const generateUnknownCommandEmbed = (client, commandName) => {
     return new DefaultEmbed(client)
         .setTitle('Command help')
-        .setDescription(`There's no command called "${commandName}"!
+        .setDescription(`There's no command called ${inlineCode(commandName)}!
             You can look at a list of all the commands using ${inlineCode('/help all')}`)
         .setBotThumbnail();
 };
@@ -112,14 +120,14 @@ const generateCommandPages = (client, commands, category = '') => {
         pages[pageIndex].addFields({ name: fieldName, value: fieldValue });
 
         // If we're past the max commands per page, move to the next page.
-        if (pages[pageIndex].fields.length >= COMMANDS_PER_PAGE)
+        if (pages[pageIndex].data.fields.length >= COMMANDS_PER_PAGE)
             pageIndex++;
     }
 
     // Add notes to the last field of every page.
     const notes = '\n\n' + bold('() = optional | [] = required');
     pages.forEach(page => {
-        page.fields[page.fields.length - 1].value += notes;
+        page.data.fields[page.data.fields.length - 1].value += notes;
     });
 
     return pages;
@@ -156,8 +164,14 @@ export const execute = async interaction => {
     // Handle category command help (/help category [category]).
     if (subcommand === 'category') {
         const category = interaction.options.getString('category', true);
-        const categoryCommands = client.bot.commands.filter(command => command.category === category);
+        const validCategories = Array.from(new Set(client.bot.commands.map(command => command.category)));
 
+        if (!validCategories.includes(category)) {
+            const embed = generateUnknownCategoryEmbed(client, category, validCategories);
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
+        const categoryCommands = client.bot.commands.filter(command => command.category === category);
         const pages = generateCommandPages(client, categoryCommands, toTitleCase(category));
 
         await interaction.deferReply();
